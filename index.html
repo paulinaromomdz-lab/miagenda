@@ -11,8 +11,8 @@
 *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
 button,input,textarea{font:inherit} button{cursor:pointer}
 header{position:sticky;top:0;z-index:20;background:rgba(232,248,248,.96);backdrop-filter:blur(12px);padding:13px 14px 8px;border-bottom:1px solid #ffffff}
-h1{text-align:center;margin:0;font-size:34px;line-height:1;letter-spacing:2px;font-weight:900;font-family:"Comic Sans MS","Marker Felt","Bradley Hand",cursive;background:linear-gradient(90deg,#ef8379,#f2a65a,#e5c23d,#70b6d1,#ba8bd1);color:transparent;background-clip:text;-webkit-background-clip:text}
-.date{text-align:center;color:var(--muted);font-size:12px;margin:2px 0 9px}
+h1{text-align:center;margin:0;font-size:39px;line-height:1.05;letter-spacing:1px;font-weight:900;font-family:"Comic Sans MS","Marker Felt","Bradley Hand",cursive;background:linear-gradient(90deg,#ef7693,#f5a04f,#f5ca3d,#78cbb4,#42b6d5,#a98bdb);color:transparent;background-clip:text;-webkit-background-clip:text;-webkit-text-stroke:5px #fff;paint-order:stroke fill;text-shadow:0 3px 7px #ef769326}
+.date{text-align:center;font-size:18px;line-height:1.15;font-weight:900;font-family:"Comic Sans MS","Marker Felt","Bradley Hand",cursive;background:linear-gradient(90deg,#ef7693,#f5a04f,#f5ca3d,#78cbb4,#42b6d5,#a98bdb);color:transparent;background-clip:text;-webkit-background-clip:text;-webkit-text-stroke:1.5px #fff;paint-order:stroke fill;background-color:#fff;border-radius:18px;padding:8px 14px;margin:7px auto 10px;max-width:max-content;box-shadow:0 3px 10px #ef76931c}
 nav{display:flex;gap:7px;overflow:auto;padding:2px 0;scrollbar-width:none}nav button{border:0;background:#fff;border-radius:18px;padding:9px 12px;white-space:nowrap;font-weight:700;font-size:12px;box-shadow:0 2px 7px #00000012}nav button.on{outline:2px solid #7eaab4}
 main{max-width:920px;margin:auto;padding:13px}
 .toolbar{display:flex;gap:7px;align-items:center;justify-content:space-between;margin-bottom:12px}
@@ -37,7 +37,7 @@ main{max-width:920px;margin:auto;padding:13px}
 </style>
 </head>
 <body>
-<header><h1>HORARIO</h1><div class="date" id="date"></div><nav id="nav"></nav></header>
+<header><h1>HORARIO PAU</h1><div class="date" id="date"></div><nav id="nav"></nav></header>
 <main id="app"></main>
 <div class="modal" id="modal"><div class="sheet" id="sheet"></div></div>
 <div class="toast" id="toast"></div>
