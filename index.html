@@ -11,8 +11,9 @@
 *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
 button,input,textarea{font:inherit} button{cursor:pointer}
 header{position:sticky;top:0;z-index:20;background:rgba(232,248,248,.96);backdrop-filter:blur(12px);padding:13px 14px 8px;border-bottom:1px solid #ffffff}
-h1{text-align:center;margin:0;font-size:38px;line-height:1.05;letter-spacing:1px;font-weight:900;font-family:"Arial Rounded MT Bold","Trebuchet MS",sans-serif;background:linear-gradient(90deg,#f47f9b,#f5a052,#f5c84c,#7acbb5,#49b5d5,#a98bdb);color:transparent;background-clip:text;-webkit-background-clip:text;text-shadow:0 3px 5px #b88ba633}
-.date{text-align:center;font-size:18px;line-height:1.15;font-weight:900;font-family:"Arial Rounded MT Bold","Trebuchet MS",sans-serif;background:linear-gradient(90deg,#f47f9b,#f5a052,#f5c84c,#7acbb5,#49b5d5,#a98bdb);color:transparent;background-clip:text;-webkit-background-clip:text;text-shadow:0 2px 4px #b88ba622;background-color:#fff;border-radius:18px;padding:8px 14px;margin:7px auto 10px;max-width:max-content}
+h1{text-align:center;margin:0;font-size:38px;line-height:1.05;letter-spacing:0;font-weight:900;font-family:"Arial Rounded MT Bold","Trebuchet MS",sans-serif;text-shadow:none}
+h1 .c1{color:#f36f9b}h1 .c2{color:#f5a04b}h1 .c3{color:#f4c83d}h1 .c4{color:#82c9a5}h1 .c5{color:#54b5d5}h1 .c6{color:#9b83d5}h1 .c7{color:#d17ac0}h1 .c8{color:#ef6f9d}h1 .c9{color:#6eaee5}h1 .c10{color:#a77bd1}
+.date{text-align:center;font-size:18px;line-height:1.15;font-weight:900;font-family:"Arial Rounded MT Bold","Trebuchet MS",sans-serif;background:linear-gradient(90deg,#f36f9b,#f5a04b,#f4c83d,#82c9a5,#54b5d5,#9b83d5);color:transparent;background-clip:text;-webkit-background-clip:text;text-shadow:none;background-color:#fff;border-radius:18px;padding:8px 14px;margin:7px auto 10px;max-width:max-content}
 nav{display:flex;gap:7px;overflow:auto;padding:2px 0;scrollbar-width:none}nav button{border:0;background:#fff;border-radius:18px;padding:9px 12px;white-space:nowrap;font-weight:700;font-size:12px;box-shadow:0 2px 7px #00000012}nav button.on{outline:2px solid #7eaab4}
 main{max-width:920px;margin:auto;padding:13px}
 .toolbar{display:flex;gap:7px;align-items:center;justify-content:space-between;margin-bottom:12px}
@@ -37,7 +38,7 @@ main{max-width:920px;margin:auto;padding:13px}
 </style>
 </head>
 <body>
-<header><h1>HORARIO PAU</h1><div class="date" id="date"></div><nav id="nav"></nav></header>
+<header><h1><h1><span class="c1">H</span><span class="c2">O</span><span class="c3">R</span><span class="c4">A</span><span class="c5">R</span><span class="c6">I</span><span class="c7">O</span> <span class="c8">P</span><span class="c9">A</span><span class="c10">U</span></h1></h1><div class="date" id="date"></div><nav id="nav"></nav></header>
 <main id="app"></main>
 <div class="modal" id="modal"><div class="sheet" id="sheet"></div></div>
 <div class="toast" id="toast"></div>
