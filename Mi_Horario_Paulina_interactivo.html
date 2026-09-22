@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#e4f7f8">
+<title>Mi Horario · Paulina</title>
+<style>
+:root{--bg:#e8f8f8;--card:#fff;--ink:#3e4650;--muted:#7a858e;--border:#a8bec5;
+--food:#d9f1a4;--work:#ffe08c;--gym:#f3a7ae;--med:#efb4d3;--free:#ffd1a5;--home:#b2dfeb;--sleep:#d7c1ea;--admin:#dce0e5;--accent:#eb8d82}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button,input,textarea{font:inherit} button{cursor:pointer}
+header{position:sticky;top:0;z-index:20;background:rgba(232,248,248,.96);backdrop-filter:blur(12px);padding:13px 14px 8px;border-bottom:1px solid #ffffff}
+h1{text-align:center;margin:0;font-size:27px;letter-spacing:4px;background:linear-gradient(90deg,#ef8379,#e5b36e,#70b6d1,#ba8bd1);color:transparent;background-clip:text}
+.date{text-align:center;color:var(--muted);font-size:12px;margin:2px 0 9px}
+nav{display:flex;gap:7px;overflow:auto;padding:2px 0;scrollbar-width:none}nav button{border:0;background:#fff;border-radius:18px;padding:9px 12px;white-space:nowrap;font-weight:700;font-size:12px;box-shadow:0 2px 7px #00000012}nav button.on{outline:2px solid #7eaab4}
+main{max-width:920px;margin:auto;padding:13px}
+.toolbar{display:flex;gap:7px;align-items:center;justify-content:space-between;margin-bottom:12px}
+.toolbar .left{display:flex;align-items:center;gap:7px}.round{width:38px;height:38px;border:0;border-radius:13px;background:#fff;box-shadow:0 2px 7px #0001;font-size:18px}
+.day{font-weight:900;text-transform:uppercase;font-size:20px}
+.primary{border:0;background:var(--accent);color:#fff;font-weight:800;border-radius:13px;padding:10px 13px}
+.secondary{border:1px solid #c7d5d9;background:#fff;border-radius:13px;padding:9px 12px;font-weight:700}
+.now{background:#fff;border:2px solid var(--accent);border-radius:18px;padding:14px;margin-bottom:12px;box-shadow:0 4px 12px #0000000c}
+.now .label{font-size:11px;font-weight:900;color:var(--accent);letter-spacing:1px}.now h2{margin:4px 0;font-size:22px}.now p{margin:2px 0;color:var(--muted);font-size:13px}
+.item{display:flex;gap:0;margin:7px 0;border-radius:13px;overflow:hidden;box-shadow:0 1px 5px #00000008;min-height:49px}
+.item.done{opacity:.42}.item.done .desc{text-decoration:line-through}.time{width:78px;display:flex;align-items:center;justify-content:center;text-align:center;background:#f5f6f7;font-size:10px;font-weight:800;padding:4px}.desc{flex:1;padding:10px 11px;font-size:12px;font-weight:700;display:flex;align-items:center}.check{width:42px;border:0;background:#fff;font-size:17px}
+.food .desc{background:var(--food)}.work .desc{background:var(--work)}.gym .desc{background:var(--gym)}.med .desc{background:var(--med)}.free .desc{background:var(--free)}.home .desc{background:var(--home)}.sleep .desc{background:var(--sleep)}.admin .desc{background:var(--admin)}
+.card{background:#fff;border:1.5px solid var(--border);border-radius:18px;padding:14px;margin-bottom:12px}.card h2{margin:0 0 11px;font-size:17px}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.mini{background:#fff;border:1px solid #c9d7db;border-radius:15px;padding:12px}.mini h3{margin:0 0 8px;font-size:13px}
+.row{display:flex;gap:8px}.row input,.row textarea{flex:1;border:1px solid #c9d4d8;border-radius:12px;padding:10px;outline:none;background:#fff}.row textarea{min-height:90px}
+.list{margin:0;padding:0;list-style:none}.list li{display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid #eef1f2;font-size:13px}.list li:last-child{border-bottom:0}.list input{width:18px;height:18px}.strike{text-decoration:line-through;opacity:.45}
+.pill{display:inline-block;padding:5px 8px;border-radius:20px;font-size:10px;font-weight:800;background:#f0f3f4}
+.exercise{display:grid;grid-template-columns:1fr 72px 62px;gap:5px;padding:9px 5px;border-bottom:1px solid #edf0f1;font-size:12px}.exercise.head{font-weight:900;background:#d8df5c;border-radius:8px}
+.small{font-size:11px;color:var(--muted);line-height:1.5}.empty{padding:20px;text-align:center;color:var(--muted)}
+.modal{position:fixed;inset:0;background:#0007;display:none;z-index:50;padding:15px;align-items:flex-end}.modal.show{display:flex}.sheet{background:#fff;width:100%;max-width:650px;margin:auto;border-radius:22px;padding:17px;max-height:90vh;overflow:auto}.sheet h2{margin:0 0 12px}.close{float:right;border:0;background:#f1f3f4;border-radius:10px;width:34px;height:34px}.field{margin:10px 0}.field label{display:block;font-size:11px;font-weight:800;margin-bottom:5px}.field input,.field select{width:100%;padding:10px;border:1px solid #ccd6da;border-radius:11px;background:#fff}.actions{display:flex;gap:8px;margin-top:13px}.actions>*{flex:1}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#333;color:#fff;padding:10px 14px;border-radius:13px;font-size:12px;display:none;z-index:70}.toast.show{display:block}
+@media(max-width:650px){.grid{grid-template-columns:1fr}.day{font-size:17px}.toolbar .primary{font-size:11px}.exercise{grid-template-columns:1fr 60px 55px}}
+</style>
+</head>
+<body>
+<header><h1>HORARIO</h1><div class="date" id="date"></div><nav id="nav"></nav></header>
+<main id="app"></main>
+<div class="modal" id="modal"><div class="sheet" id="sheet"></div></div>
+<div class="toast" id="toast"></div>
+<script>
+const DAYS=["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"];
+const COLORS={comida:"food",trabajo:"work",gym:"gym",med:"med",libre:"free",casa:"home",sueno:"sleep",admin:"admin"};
+const LS="paulina_horario_v2";
+const defaultSchedule = {"Lunes": [["8:00–8:10", "Despertar · Alarmy", "admin"], ["8:10–8:25", "Medicamentos + té de manzanilla", "med"], ["8:25–8:40", "COLACIÓN 1 · Avena hidratada", "comida"], ["8:40–8:55", "Preparar omelet + té de canela", "comida"], ["8:55–9:15", "DESAYUNO · Omelet de espinacas + té de canela", "comida"], ["9:15–9:30", "Preparar lunch + bolsa", "admin"], ["9:30–11:00", "Traslado al consultorio", "gym"], ["11:00–11:30", "Preparativos del trabajo", "trabajo"], ["11:30–14:10", "Trabajo / pacientes", "trabajo"], ["14:30–15:00", "COMIDA · Avena + pollo + verduras al vapor", "comida"], ["15:00–17:00", "Trabajo / pacientes", "trabajo"], ["17:00–18:30", "Regreso a casa", "gym"], ["18:30–18:50", "Perros + cambio", "casa"], ["18:50–19:10", "Traslado al gym", "gym"], ["19:10–20:00", "GYM · entrenamiento", "gym"], ["20:00–20:20", "Ducha + regreso", "gym"], ["20:20–20:40", "CENA · Brócoli + 180 g carne de res", "comida"], ["20:40–21:10", "PREP · dejar listo martes", "comida"], ["21:10–22:30", "Tiempo libre / descanso", "libre"], ["22:30–23:30", "Rutina de sueño", "sueno"]], "Martes": [["8:00–8:10", "Despertar · Alarmy", "admin"], ["8:10–8:25", "Medicamentos + té de manzanilla", "med"], ["8:25–8:40", "COLACIÓN 1 · Avena hidratada", "comida"], ["8:40–8:55", "Preparar omelet + té de canela", "comida"], ["8:55–9:15", "DESAYUNO · Omelet de espinacas + té de canela", "comida"], ["9:15–9:45", "Preparar espacio + pendientes", "admin"], ["10:00–14:00", "Trabajo / pacientes", "trabajo"], ["14:00–14:25", "COMIDA · Avena + pollo + verduras al vapor", "comida"], ["14:25–14:45", "Preparar gym + cambio", "gym"], ["14:45–15:05", "Traslado al gym", "gym"], ["15:05–15:50", "GYM · entrenamiento", "gym"], ["15:50–16:00", "Ducha + regreso", "gym"], ["16:00–21:00", "Trabajo / pacientes", "trabajo"], ["21:00–21:20", "Perros", "casa"], ["21:20–21:40", "CENA · Brócoli + 180 g carne de res", "comida"], ["21:40–22:10", "PREP · dejar listo miércoles", "comida"], ["22:10–22:30", "Tiempo libre / descanso", "libre"], ["22:30–23:30", "Rutina de sueño", "sueno"]], "Miércoles": [["8:00–8:10", "Despertar · Alarmy", "admin"], ["8:10–8:25", "Medicamentos + té de manzanilla", "med"], ["8:25–8:40", "COLACIÓN 1 · Avena hidratada", "comida"], ["8:40–8:55", "Preparar yogur + fresas + chía", "comida"], ["8:55–9:15", "DESAYUNO · Yogur griego + fresas + chía", "comida"], ["9:15–9:30", "Traslado al gym", "gym"], ["9:30–10:15", "GYM · entrenamiento", "gym"], ["10:15–10:35", "Ducha + arreglarse", "gym"], ["10:35–11:05", "Preparar salida + pendientes", "admin"], ["11:05–12:00", "Traslado al consultorio", "gym"], ["12:00–16:00", "Trabajo / pacientes", "trabajo"], ["16:00–17:30", "Regreso a casa", "gym"], ["17:30–17:50", "Perros", "casa"], ["17:50–18:15", "COMIDA · Ensalada con 3 huevos + algas/espinacas + panela", "comida"], ["18:15–19:45", "Tiempo libre / descanso", "libre"], ["19:45–20:05", "CENA · Omelet de espinacas", "comida"], ["20:05–20:25", "PREP · dejar lista colación del jueves", "comida"], ["20:25–20:45", "Tiempo libre / descanso", "libre"], ["20:45–21:05", "Preparar jueves · ropa + bolsa", "admin"], ["22:30–23:30", "Rutina de sueño", "sueno"]], "Jueves": [["8:00–8:10", "Despertar · Alarmy", "admin"], ["8:10–8:25", "Medicamentos + té de manzanilla", "med"], ["8:25–8:40", "COLACIÓN 1 · Avena hidratada", "comida"], ["8:40–8:55", "Preparar yogur + fresas + chía", "comida"], ["8:55–9:15", "DESAYUNO · Yogur griego + fresas + chía", "comida"], ["9:15–9:30", "Traslado al gym", "gym"], ["9:30–10:15", "GYM · entrenamiento", "gym"], ["10:15–10:35", "Ducha + regreso", "gym"], ["10:35–10:50", "Preparar comida + espacio de trabajo", "admin"], ["10:50–11:10", "COLACIÓN · Pera + 10 almendras", "comida"], ["11:10–11:45", "Historia / aprendizaje personal", "libre"], ["11:45–12:15", "COMIDA · Pollo + espinacas + camote", "comida"], ["12:15–12:35", "Preparar trabajo", "trabajo"], ["13:00–20:00", "Trabajo / pacientes", "trabajo"], ["20:00–21:15", "Extensión de trabajo si aplica", "trabajo"], ["21:15–21:35", "Perros", "casa"], ["21:35–21:55", "CENA · Ensalada de atún con apio", "comida"], ["21:55–22:15", "PREP · dejar listo viernes", "comida"], ["22:15–22:30", "Tiempo libre / descanso", "libre"], ["22:30–23:30", "Rutina de sueño", "sueno"]], "Viernes": [["8:00–8:10", "Despertar · Alarmy", "admin"], ["8:10–8:25", "Medicamentos", "med"], ["8:25–8:40", "COLACIÓN 1 · Avena hidratada", "comida"], ["8:40–8:55", "Preparar yogur + fresas + chía", "comida"], ["8:55–9:15", "DESAYUNO · Yogur griego + fresas + chía", "comida"], ["9:15–9:45", "Preparar trabajo", "admin"], ["10:00–11:00", "Trabajo", "trabajo"], ["11:00–14:00", "Círculo de lectura", "trabajo"], ["14:00–14:30", "COMIDA · Pollo + espinacas + camote", "comida"], ["14:30–17:00", "Trabajo", "trabajo"], ["17:00–17:20", "Preparar gym + colación", "gym"], ["17:20–18:05", "GYM · sesión corta", "gym"], ["18:05–18:25", "Ducha + regreso", "gym"], ["18:25–18:45", "PREP · dejar listo atún + apio + hojas verdes", "comida"], ["18:45–19:10", "COLACIÓN · Semillas de girasol + fresa", "comida"], ["19:10–19:35", "CENA · Ensalada de atún con apio", "comida"], ["19:35–22:30", "Tiempo libre / descanso", "libre"], ["22:30–23:30", "Rutina de sueño", "sueno"]], "Sábado": [["8:00–8:10", "Despertar · Alarmy", "admin"], ["8:10–8:25", "Medicamentos", "med"], ["8:25–8:40", "COLACIÓN 1 · Avena hidratada", "comida"], ["8:40–8:55", "Preparar hotcakes + frutos rojos", "comida"], ["8:55–9:15", "DESAYUNO · Hotcakes de avena + miel + frutos rojos", "comida"], ["9:15–9:30", "Traslado al gym", "gym"], ["9:30–10:15", "GYM · entrenamiento", "gym"], ["10:15–10:35", "Ducha + regreso", "gym"], ["10:35–11:10", "PREP · batido + proteína + pescado, arroz y ensalada", "comida"], ["11:10–11:30", "COLACIÓN · Batido de plátano y almendras", "comida"], ["11:30–12:30", "Tarea de casa / mensual", "casa"], ["12:30–13:00", "Compras", "admin"], ["13:00–14:00", "COMIDA · Pescado + arroz integral + ensalada", "comida"], ["14:00–14:15", "PREP · yogur + chispas de chocolate", "comida"], ["14:15–14:30", "MERIENDA · Yogur + chocolate amargo", "comida"], ["14:30–19:30", "Tiempo libre / descanso", "libre"], ["19:30–20:00", "PREP · pollo + lechuga + jitomate + pepino", "comida"], ["20:00–20:25", "CENA · Ensalada de pollo con aderezo de yogur", "comida"], ["20:25–22:30", "Tiempo libre / descanso", "libre"], ["22:30–23:30", "Rutina de sueño", "sueno"]], "Domingo": [["8:00–8:10", "Despertar · Alarmy", "admin"], ["8:10–8:25", "Medicamentos", "med"], ["8:25–8:40", "COLACIÓN 1 · Avena hidratada", "comida"], ["8:40–8:55", "Preparar tostadas + aguacate + jitomate", "comida"], ["8:55–9:15", "DESAYUNO · Tostadas de aguacate y apio", "comida"], ["9:15–9:30", "Traslado al gym", "gym"], ["9:30–10:15", "GYM · movilidad + cardio suave", "gym"], ["10:15–10:35", "Ducha + regreso", "gym"], ["10:35–11:15", "Compras", "admin"], ["11:15–12:30", "PREP SEMANAL · avena, huevos, nopales/verduras y porciones", "comida"], ["12:30–12:50", "COLACIÓN · Kiwi + queso panela", "comida"], ["12:50–13:10", "Guardar alimentos + limpiar cocina", "casa"], ["13:10–13:40", "COMIDA · Pescado + hojas verdes + pepita", "comida"], ["13:40–14:00", "PREP · gelatina + tortilla + pepino", "comida"], ["14:00–14:15", "COLACIÓN · Gelatina", "comida"], ["14:15–14:40", "Finanzas / pagos", "admin"], ["14:40–15:25", "Revisar semana", "admin"], ["15:25–15:45", "CENA · Tortilla integral + panela + pepino", "comida"], ["15:45–18:00", "Ropa + bolsa de gym", "admin"], ["18:00–20:00", "Tiempo libre / descanso", "libre"], ["20:00–21:00", "Cierre de semana", "admin"], ["21:00–22:30", "Rutina de sueño", "sueno"]]};
+const shopping = {"Proteínas":["Huevo","Pollo","Pescado blanco","Pavo","Atún","Carne"],"Verduras":["Espinaca","Brócoli","Hojas verdes","Pepino","Jitomate","Zanahoria","Chayote","Calabaza","Apio","Jícama","Nopal"],"Frutas":["Fresa","Mango","Pera","Kiwi","Plátano","Manzana","Frutos rojos","Limón"],"Refrigerados":["Yogur griego","Leche de almendra","Queso panela"],"Despensa":["Avena","Chía","Almendras","Pistaches","Semillas de calabaza","Semillas de girasol","Crema de cacahuate/almendra","Chocolate 85%","Tostadas/tortillas integrales"]};
+const baseTasks={"Casa":["Lavar platos","Limpiar terraza","Jardín / plantas","Recoger y ordenar","Sacar basura","Organizar ropa / cómodas","Limpieza profunda con Martita","Limpieza general · miércoles","Mantener casa al día","Tener efectivo para agua / basura","Mantenimiento / reparaciones","Servicios"],"Perros":["Alimentar","Baño","Vacunas","Veterinario / cuidados"],"Finanzas y Admin":["Pagar maestría","Actualizar portal de consulta","Pagar seguro médico","Pagar tarjetas","Pagar servicios","Pagar terapia de mamá","Revisar finanzas propias","Organizar pagos","Revisar finanzas de Límbico con Nat","Citas médicas / seguimiento"]};
+const workouts={"1–3":[["Elevación de rodillas","11 min","Las que salgan"],["Oblicuos en barra","11 min","Las que salgan"],["Laterales de mancuernas","11 min","8–15"],["Deltoide posterior máquina","11 min","8–15"],["Deltoide frontal","11 min","8–15"],["Bícep martillo","11 min","8–15"],["Barra Z abierta","11 min","8–15"],["Extensión de trícep barra recta","11 min","8–15"],["Extensión de trícep","11 min","8–15"],["Copa polea","11 min","8–15"]],"4–6":[["Press de pierna","15 min","8–15"],["Hack squat","16 min","8–15"],["Extensión de pierna","15 min","8–15"],["Extensión de pierna puntas al frente","16 min","8–15"],["Abductor máquina","15 min","8–15"],["Aductor máquina","16 min","8–15"],["Hip thrust","15 min","8–15"]],"7–9":[["Gemelo sentado","13 min","8–15"],["Femoral sentado","13 min","8–15"],["Press de pecho inclinado Smith","14 min","8–15"],["Press de pecho plano","14 min","8–15"],["Jalón supino","13 min","8–15"],["Remo supino","13 min","8–15"],["Remo cerrado","14 min","8–15"],["Encogimiento inclinado","14 min","8–15"]]};
+
+let state=JSON.parse(localStorage.getItem(LS)||"null")||{day:null,tab:"day",done:{},tasks:[],customSchedule:defaultSchedule};
+const jsDay=(new Date().getDay()+6)%7;
+if(!state.day)state.day=DAYS[jsDay];
+function save(){localStorage.setItem(LS,JSON.stringify(state))}
+function esc(s){return s.replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+function toast(s){let t=document.getElementById("toast");t.textContent=s;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1600)}
+function setTab(t){state.tab=t;save();render()}
+function setDay(d){state.day=d;state.tab="day";save();render()}
+function key(d,i){return d+"_"+i}
+function toggle(k){state.done[k]=!state.done[k];save();render()}
+function nav(){document.getElementById("nav").innerHTML=[["day","📅 Hoy"],["week","🗓 Semana"],["meals","🍎 Comidas"],["shopping","🛒 Compras"],["tasks","✅ Pendientes"],["gym","🏋️ Gym"],["ai","✨ IA"]].map(x=>`<button class="${state.tab===x[0]?'on':''}" onclick="setTab('${x[0]}')">${x[1]}</button>`).join("")}
+function toolbar(){return `<div class="toolbar"><div class="left"><button class="round" onclick="setDay(DAYS[(DAYS.indexOf(state.day)+6)%7])">‹</button><div class="day">${state.day}</div><button class="round" onclick="setDay(DAYS[(DAYS.indexOf(state.day)+1)%7])">›</button></div><button class="primary" onclick="openEditDay()">✏️ Editar día</button></div>`}
+function nowCard(){
+ let arr=state.customSchedule[state.day], idx=arr.findIndex((x,i)=>!state.done[key(state.day,i)]);
+ let x=idx>=0?arr[idx]:null;
+ return `<div class="now"><div class="label">SIGUIENTE</div>${x?`<h2>${esc(x[1])}</h2><p>${esc(x[0])} · toca el bloque para marcarlo como terminado</p>`:`<h2>🎉 Día completo</h2><p>No quedan bloques sin marcar.</p>`}</div>`
+}
+function dayView(){
+ let arr=state.customSchedule[state.day];
+ return toolbar()+nowCard()+`<div>${arr.map((x,i)=>`<div class="item ${COLORS[x[2]]} ${state.done[key(state.day,i)]?'done':''}" onclick="toggle('${key(state.day,i)}')"><div class="time">${esc(x[0])}</div><div class="desc">${esc(x[1])}</div><button class="check" onclick="event.stopPropagation();toggle('${key(state.day,i)}')">${state.done[key(state.day,i)]?'✓':'○'}</button></div>`).join("")}</div>`;
+}
+function weekView(){return `<div class="card"><h2>🗓 Semana</h2><div class="grid">${DAYS.map(d=>`<div class="mini"><h3>${d}</h3><p class="small">${state.customSchedule[d].length} bloques · ${state.customSchedule[d].filter((x,i)=>state.done[key(d,i)]).length} completados</p><button class="secondary" onclick="setDay('${d}')">Ver día</button></div>`).join("")}</div></div>`}
+function mealsView(){
+ return `<div class="card"><h2>🍎 Comidas</h2><div class="grid">${DAYS.map(d=>`<div class="mini"><h3>${d}</h3><ul class="list">${state.customSchedule[d].filter(x=>/DESAYUNO|COMIDA ·|CENA ·|COLACIÓN|MERIENDA/.test(x[1])).map(x=>`<li><span>${esc(x[0])}</span><span>${esc(x[1])}</span></li>`).join("")}</ul></div>`).join("")}</div></div>`;
+}
+function shoppingView(){
+ let checks=state.shoppingDone||{};
+ return `<div class="card"><h2>🛒 Lista de compras</h2><div class="grid">${Object.entries(shopping).map(([h,a])=>`<div class="mini"><h3>${h}</h3><ul class="list">${a.map((x,i)=>{let k=h+i;return `<li><input type="checkbox" ${checks[k]?'checked':''} onchange="shop('${k}')"><span class="${checks[k]?'strike':''}">${x}</span></li>`}).join("")}</ul></div>`).join("")}</div></div>`;
+}
+function shop(k){state.shoppingDone=state.shoppingDone||{};state.shoppingDone[k]=!state.shoppingDone[k];save();render()}
+function tasksView(){
+ return `<div class="card"><h2>✅ Pendientes</h2><div class="grid">${Object.entries(baseTasks).map(([h,a])=>`<div class="mini"><h3>${h}</h3><ul class="list">${a.map((x,i)=>{let k="base_"+h+"_"+i;return `<li><input type="checkbox" ${state.done[k]?'checked':''} onchange="toggle('${k}')"><span class="${state.done[k]?'strike':''}">${x}</span></li>`}).join("")}</ul></div>`).join("")}</div></div>
+ <div class="card"><h2>➕ Pendientes nuevos</h2>${state.tasks.map((x,i)=>`<div class="taskline"><label class="taskrow"><input type="checkbox" ${x.done?'checked':''} onchange="toggleCustom(${i})"><span class="${x.done?'strike':''}">${esc(x.text)}</span></label><button class="secondary" onclick="removeTask(${i})">Eliminar</button></div>`).join("")}<div class="row"><input id="newTask" placeholder="Ej. Comprar croquetas"><button class="primary" onclick="addTask()">Agregar</button></div></div>`;
+}
+function addTask(){let v=document.getElementById("newTask").value.trim();if(v){state.tasks.push({text:v,done:false});save();render();toast("Pendiente agregado")}}
+function toggleCustom(i){state.tasks[i].done=!state.tasks[i].done;save();render()}
+function removeTask(i){state.tasks.splice(i,1);save();render()}
+function gymView(){
+ return `<div class="card"><h2>🏋️ Entrenamiento S.O.N.</h2><p class="small"><b>Calentamiento:</b> dinámico 10 min o isométrico 5 min. Incluye pre-movilidad general, cardio coordinativo, estabilidad central y pre-activación muscular.</p><p class="small"><b>Cadencia:</b> 2-5-2. <b>Descanso:</b> 30 s. Nunca al fallo. 8–15 reps: mantén peso; &gt;15: aumenta; &lt;8: reduce.</p></div>${Object.entries(workouts).map(([d,a])=>`<div class="card"><h2>Días ${d}</h2><div class="exercise head"><div>Ejercicio</div><div>Tiempo</div><div>Reps</div></div>${a.map(x=>`<div class="exercise"><div>${x[0]}</div><div>${x[1]}</div><div>${x[2]}</div></div>`).join("")}</div>`).join("")}`;
+}
+function aiView(){
+ return `<div class="card"><h2>✨ Organiza mi día</h2><p class="small">Esta versión ya puede interpretar algunas instrucciones sin conexión. La siguiente fase puede conectar una IA real para modificar tu horario mediante conversación.</p><textarea id="aiq" placeholder="Ej.: No voy al gym hoy y necesito hacer compras antes de las 7."></textarea><div class="actions"><button class="primary" onclick="ask()">Organizar</button><button class="secondary" onclick="setTab('day')">Volver a hoy</button></div><div id="answer"></div></div>`;
+}
+function ask(){
+ let q=document.getElementById("aiq").value.toLowerCase(),ans="";
+ if(q.includes("no voy")&&q.includes("gym")) ans=`Puedo quitar el bloque de gym de ${state.day}, pero en esta versión prefiero pedirte confirmación antes de modificar tu horario. <br><br><button class="primary" onclick="removeGym()">Sí, quitar gym de hoy</button>`;
+ else if(q.includes("compr")) ans=`Hoy tu horario incluye compras si corresponde. También puedes abrir <b>🛒 Compras</b> y marcar lo que ya tengas.`;
+ else ans=`Para ${state.day}, tu siguiente bloque sin completar es: <b>${esc((state.customSchedule[state.day].find((x,i)=>!state.done[key(state.day,i)])||["","Todo listo",""])[1])}</b>.`;
+ document.getElementById("answer").innerHTML=`<div class="now" style="margin-top:12px"><div class="label">ASISTENTE</div><p>${ans}</p></div>`;
+}
+function removeGym(){state.customSchedule[state.day]=state.customSchedule[state.day].filter(x=>!x[1].toUpperCase().includes("GYM ·"));save();render();toast("Gym quitado de hoy")}
+function openEditDay(){
+ let arr=state.customSchedule[state.day];
+ document.getElementById("sheet").innerHTML=`<button class="close" onclick="closeModal()">✕</button><h2>Editar ${state.day}</h2><p class="small">Puedes cambiar texto, hora o categoría. Los cambios quedan guardados en este navegador.</p>${arr.map((x,i)=>`<div class="field"><label>Bloque ${i+1}</label><input id="t${i}" value="${esc(x[0])}"><input id="d${i}" value="${esc(x[1])}" style="margin-top:5px"></div>`).join("")}<div class="actions"><button class="secondary" onclick="closeModal()">Cancelar</button><button class="primary" onclick="saveDay()">Guardar cambios</button></div>`;
+ document.getElementById("modal").classList.add("show");
+}
+function saveDay(){
+ let arr=state.customSchedule[state.day];arr.forEach((x,i)=>{x[0]=document.getElementById("t"+i).value;x[1]=document.getElementById("d"+i).value});save();closeModal();render();toast("Horario actualizado")}
+function closeModal(){document.getElementById("modal").classList.remove("show")}
+function render(){
+ document.getElementById("date").textContent=new Date().toLocaleDateString("es-MX",{weekday:"long",day:"numeric",month:"long"});
+ nav();let a=document.getElementById("app");
+ a.innerHTML=state.tab==="day"?dayView():state.tab==="week"?weekView():state.tab==="meals"?mealsView():state.tab==="shopping"?shoppingView():state.tab==="tasks"?tasksView():state.tab==="gym"?gymView():aiView();
+}
+render();
+</script>
+</body>
+</html>
