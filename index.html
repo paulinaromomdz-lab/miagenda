@@ -147,7 +147,7 @@ async function ask(){
   }catch(error){
     answer.innerHTML = `<div class="now" style="margin-top:12px">
       <div class="label">ASISTENTE</div>
-      <p>⚠️ No pude conectar con la IA todavía. Inténtalo nuevamente.</p>
+      <p>⚠️ Error: ${error.message || error}</p>
     </div>`;
   }
 }
