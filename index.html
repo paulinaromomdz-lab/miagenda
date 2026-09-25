@@ -94,12 +94,62 @@ function gymView(){
 function aiView(){
  return `<div class="card"><h2>✨ Organiza mi día</h2><p class="small">Esta versión ya puede interpretar algunas instrucciones sin conexión. La siguiente fase puede conectar una IA real para modificar tu horario mediante conversación.</p><textarea id="aiq" placeholder="Ej.: No voy al gym hoy y necesito hacer compras antes de las 7."></textarea><div class="actions"><button class="primary" onclick="ask()">Organizar</button><button class="secondary" onclick="setTab('day')">Volver a hoy</button></div><div id="answer"></div></div>`;
 }
-function ask(){
- let q=document.getElementById("aiq").value.toLowerCase(),ans="";
- if(q.includes("no voy")&&q.includes("gym")) ans=`Puedo quitar el bloque de gym de ${state.day}, pero en esta versión prefiero pedirte confirmación antes de modificar tu horario. <br><br><button class="primary" onclick="removeGym()">Sí, quitar gym de hoy</button>`;
- else if(q.includes("compr")) ans=`Hoy tu horario incluye compras si corresponde. También puedes abrir <b>🛒 Compras</b> y marcar lo que ya tengas.`;
- else ans=`Para ${state.day}, tu siguiente bloque sin completar es: <b>${esc((state.customSchedule[state.day].find((x,i)=>!state.done[key(state.day,i)])||["","Todo listo",""])[1])}</b>.`;
- document.getElementById("answer").innerHTML=`<div class="now" style="margin-top:12px"><div class="label">ASISTENTE</div><p>${ans}</p></div>`;
+async function ask(){
+  const input = document.getElementById("aiq");
+  const answer = document.getElementById("answer");
+  const message = input.value.trim();
+
+  if(!message){
+    answer.innerHTML = `<div class="now" style="margin-top:12px">
+      <div class="label">ASISTENTE</div>
+      <p>Escríbeme qué necesitas organizar 💗</p>
+    </div>`;
+    return;
+  }
+
+  answer.innerHTML = `<div class="now" style="margin-top:12px">
+    <div class="label">ASISTENTE</div>
+    <p>✨ Estoy revisando tu agenda...</p>
+  </div>`;
+
+  try{
+    const context = JSON.stringify({
+      dia_actual: state.day,
+      agenda: state.customSchedule[state.day],
+      pendientes: state.tasks,
+      compras: shopping,
+      pendientes_base: baseTasks,
+      entrenamientos: workouts
+    });
+
+    const response = await fetch("/api/chat",{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify({
+        message,
+        context
+      })
+    });
+
+    const data = await response.json();
+
+    if(!response.ok){
+      throw new Error(data.error || "Error al consultar la IA");
+    }
+
+    answer.innerHTML = `<div class="now" style="margin-top:12px">
+      <div class="label">ASISTENTE</div>
+      <p>${esc(data.answer || "No recibí una respuesta.")}</p>
+    </div>`;
+
+  }catch(error){
+    answer.innerHTML = `<div class="now" style="margin-top:12px">
+      <div class="label">ASISTENTE</div>
+      <p>⚠️ No pude conectar con la IA todavía. Inténtalo nuevamente.</p>
+    </div>`;
+  }
 }
 function removeGym(){state.customSchedule[state.day]=state.customSchedule[state.day].filter(x=>!x[1].toUpperCase().includes("GYM ·"));save();render();toast("Gym quitado de hoy")}
 function openEditDay(){
