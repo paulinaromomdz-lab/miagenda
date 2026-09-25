@@ -36,6 +36,16 @@ main{max-width:920px;margin:auto;padding:13px}
 .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#333;color:#fff;padding:10px 14px;border-radius:13px;font-size:12px;display:none;z-index:70}.toast.show{display:block}
 @media(max-width:650px){.grid{grid-template-columns:1fr}.day{font-size:17px}.toolbar .primary{font-size:11px}.exercise{grid-template-columns:1fr 60px 55px}}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = "https://bhbdunbpqslwryoamsag.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "pYxmuj-wysba8-pircuf";
+
+const supabase = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_PUBLISHABLE_KEY
+);
+</script>
 </head>
 <body>
 <header><h1><h1><span class="c1">H</span><span class="c2">O</span><span class="c3">R</span><span class="c4">A</span><span class="c5">R</span><span class="c6">I</span><span class="c7">O</span> <span class="c8">P</span><span class="c9">A</span><span class="c10">U</span></h1></h1><div class="date" id="date"></div><nav id="nav"></nav></header>
