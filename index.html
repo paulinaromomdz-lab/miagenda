@@ -45,6 +45,7 @@ const supabase = window.supabase.createClient(
   SUPABASE_URL,
   SUPABASE_PUBLISHABLE_KEY
 );
+document.getElementById("auth-message").textContent = typeof supabase.auth;
 </script>
 </head>
 <body><div id="auth-screen" style="display:block;min-height:100vh;background:#e8f8f8;padding:40px 20px;text-align:center;">
