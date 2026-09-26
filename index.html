@@ -61,7 +61,7 @@ const supabaseClient = window.supabase.createClient(
     <input id="auth-password" type="password" placeholder="Contraseña"
       style="width:100%;padding:14px;margin:8px 0;border-radius:12px;border:1px solid #ddd;">
 
-  <button onclick="document.getElementById('auth-message').textContent=typeof supabase.auth"
+  <button onclick="document.getElementById('auth-message').textContent=typeof supabaseClient.auth"
       style="width:100%;padding:14px;margin-top:10px;border:0;border-radius:12px;background:#f36f9b;color:white;font-size:16px;">
       Iniciar sesión
     </button>
@@ -215,7 +215,7 @@ async function signUp() {
     return;
   }
 
-  const { error } = await supabase.auth.signUp({
+  const { error } = await supabaseClient.auth.signUp({
     email: email,
     password: password
   });
@@ -240,7 +240,7 @@ async function signIn() {
     return;
   }
 try {
-  const { error } = await supabase.auth.signInWithPassword({
+  const { error } = await supabaseClient.auth.signInWithPassword({
     email: email,
     password: password
   });
@@ -268,7 +268,7 @@ function showLogin() {
 }
 
 async function checkAuth() {
-  const { data } = await supabase.auth.getSession();
+  const { data } = await supabaseClient.auth.getSession();
 
   if (data.session) {
     showApp();
@@ -277,7 +277,7 @@ async function checkAuth() {
   }
 }
 
-supabase.auth.onAuthStateChange((event, session) => {
+supabaseClient.auth.onAuthStateChange((event, session) => {
   if (session) {
     showApp();
   } else {
