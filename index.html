@@ -238,7 +238,7 @@ async function signIn() {
     message.textContent = "Escribe tu correo y contraseña.";
     return;
   }
-
+try {
   const { error } = await supabase.auth.signInWithPassword({
     email: email,
     password: password
@@ -250,6 +250,9 @@ async function signIn() {
   }
 
   showApp();
+  } catch (e) {
+  message.textContent = "Error: " + e.message;
+}
 }
 
 function showApp() {
