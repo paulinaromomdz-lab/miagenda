@@ -60,7 +60,7 @@ const supabase = window.supabase.createClient(
     <input id="auth-password" type="password" placeholder="Contraseña"
       style="width:100%;padding:14px;margin:8px 0;border-radius:12px;border:1px solid #ddd;">
 
-    <button onclick="signIn()"
+    <button onclick="document.getElementById('auth-message').textContent='Probando...'; signIn()"
       style="width:100%;padding:14px;margin-top:10px;border:0;border-radius:12px;background:#f36f9b;color:white;font-size:16px;">
       Iniciar sesión
     </button>
