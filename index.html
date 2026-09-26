@@ -47,7 +47,32 @@ const supabase = window.supabase.createClient(
 );
 </script>
 </head>
-<body>
+<body><div id="auth-screen" style="display:none;min-height:100vh;background:#e8f8f8;padding:40px 20px;text-align:center;">
+  <h1 style="color:#f36f9b;">Mi Agenda</h1>
+  <p>Tu agenda personal, en un solo lugar ✨</p>
+
+  <div style="max-width:400px;margin:30px auto;background:white;padding:25px;border-radius:20px;">
+    <h2>Iniciar sesión</h2>
+
+    <input id="auth-email" type="email" placeholder="Correo electrónico"
+      style="width:100%;padding:14px;margin:8px 0;border-radius:12px;border:1px solid #ddd;">
+
+    <input id="auth-password" type="password" placeholder="Contraseña"
+      style="width:100%;padding:14px;margin:8px 0;border-radius:12px;border:1px solid #ddd;">
+
+    <button onclick="signIn()"
+      style="width:100%;padding:14px;margin-top:10px;border:0;border-radius:12px;background:#f36f9b;color:white;font-size:16px;">
+      Iniciar sesión
+    </button>
+
+    <button onclick="signUp()"
+      style="width:100%;padding:14px;margin-top:10px;border:0;border-radius:12px;background:#8bc9d9;color:white;font-size:16px;">
+      Crear cuenta
+    </button>
+
+    <p id="auth-message" style="margin-top:15px;"></p>
+  </div>
+</div>
 <header><h1><h1><span class="c1">H</span><span class="c2">O</span><span class="c3">R</span><span class="c4">A</span><span class="c5">R</span><span class="c6">I</span><span class="c7">O</span> <span class="c8">P</span><span class="c9">A</span><span class="c10">U</span></h1></h1><div class="date" id="date"></div><nav id="nav"></nav></header>
 <main id="app"></main>
 <div class="modal" id="modal"><div class="sheet" id="sheet"></div></div>
@@ -176,6 +201,87 @@ function render(){
  a.innerHTML=state.tab==="day"?dayView():state.tab==="week"?weekView():state.tab==="meals"?mealsView():state.tab==="shopping"?shoppingView():state.tab==="tasks"?tasksView():state.tab==="gym"?gymView():aiView();
 }
 render();
+// ===== AUTENTICACIÓN SUPABASE =====
+
+async function signUp() {
+  const email = document.getElementById("auth-email").value.trim();
+  const password = document.getElementById("auth-password").value;
+
+  const message = document.getElementById("auth-message");
+
+  if (!email || !password) {
+    message.textContent = "Escribe tu correo y contraseña.";
+    return;
+  }
+
+  const { error } = await supabase.auth.signUp({
+    email: email,
+    password: password
+  });
+
+  if (error) {
+    message.textContent = error.message;
+    return;
+  }
+
+  message.textContent =
+    "✨ Cuenta creada. Revisa tu correo para confirmar tu cuenta.";
+}
+
+async function signIn() {
+  const email = document.getElementById("auth-email").value.trim();
+  const password = document.getElementById("auth-password").value;
+
+  const message = document.getElementById("auth-message");
+
+  if (!email || !password) {
+    message.textContent = "Escribe tu correo y contraseña.";
+    return;
+  }
+
+  const { error } = await supabase.auth.signInWithPassword({
+    email: email,
+    password: password
+  });
+
+  if (error) {
+    message.textContent = error.message;
+    return;
+  }
+
+  showApp();
+}
+
+function showApp() {
+  document.getElementById("auth-screen").style.display = "none";
+  document.getElementById("app").style.display = "";
+  render();
+}
+
+function showLogin() {
+  document.getElementById("auth-screen").style.display = "block";
+  document.getElementById("app").style.display = "none";
+}
+
+async function checkAuth() {
+  const { data } = await supabase.auth.getSession();
+
+  if (data.session) {
+    showApp();
+  } else {
+    showLogin();
+  }
+}
+
+supabase.auth.onAuthStateChange((event, session) => {
+  if (session) {
+    showApp();
+  } else {
+    showLogin();
+  }
+});
+
+checkAuth();
 </script>
 </body>
 </html>
