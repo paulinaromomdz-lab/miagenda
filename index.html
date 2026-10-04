@@ -278,16 +278,24 @@ async function ask(){
   }
 }
 function removeGym(){state.customSchedule[state.day]=state.customSchedule[state.day].filter(x=>!x[1].toUpperCase().includes("GYM ·"));save();render();toast("Gym quitado de hoy")}
+let editDayDraft = null;
+
 function openEditDay(){
-  let arr=state.customSchedule[state.day];
+  editDayDraft = state.customSchedule[state.day].map(x => [...x]);
+
+  renderEditDay();
+}
+
+function renderEditDay(){
+  const arr = editDayDraft || [];
 
   document.getElementById("sheet").innerHTML=`
-    <button class="close" onclick="closeModal()">✕</button>
+    <button class="close" onclick="cancelEditDay()">✕</button>
 
     <h2>Editar ${state.day}</h2>
 
     <p class="small">
-      Puedes cambiar hora, texto y categoría. También puedes agregar o eliminar bloques.
+      Puedes cambiar hora, texto y categoría. Los cambios se guardan cuando pulses “Guardar cambios”.
     </p>
 
     <div id="editBlocks">
@@ -320,15 +328,36 @@ function openEditDay(){
 
           <select
             id="c${i}"
-            style="margin-top:5px"
-            onchange="">
-            <option value="admin" ${x[2]==="admin"?"selected":""}>📋 Administrativo</option>
-            <option value="comida" ${x[2]==="comida"?"selected":""}>🍎 Comida</option>
-            <option value="gym" ${x[2]==="gym"?"selected":""}>🏋️ Gym</option>
-            <option value="med" ${x[2]==="med"?"selected":""}>💊 Medicamentos</option>
-            <option value="trabajo" ${x[2]==="trabajo"?"selected":""}>💼 Trabajo</option>
-            <option value="traslado" ${x[2]==="traslado"?"selected":""}>🚗 Traslado</option>
-            <option value="descanso" ${x[2]==="descanso"?"selected":""}>🌿 Descanso</option>
+            style="margin-top:5px">
+
+            <option value="admin" ${x[2]==="admin"?"selected":""}>
+              📋 Administrativo
+            </option>
+
+            <option value="comida" ${x[2]==="comida"?"selected":""}>
+              🍎 Comida
+            </option>
+
+            <option value="gym" ${x[2]==="gym"?"selected":""}>
+              🏋️ Gym
+            </option>
+
+            <option value="med" ${x[2]==="med"?"selected":""}>
+              💊 Medicamentos
+            </option>
+
+            <option value="trabajo" ${x[2]==="trabajo"?"selected":""}>
+              💼 Trabajo
+            </option>
+
+            <option value="traslado" ${x[2]==="traslado"?"selected":""}>
+              🚗 Traslado
+            </option>
+
+            <option value="descanso" ${x[2]==="descanso"?"selected":""}>
+              🌿 Descanso
+            </option>
+
           </select>
 
         </div>
@@ -343,47 +372,72 @@ function openEditDay(){
     </button>
 
     <div class="actions">
-      <button class="secondary" onclick="closeModal()">Cancelar</button>
-      <button class="primary" onclick="saveDay()">Guardar cambios</button>
+      <button class="secondary" onclick="cancelEditDay()">
+        Cancelar
+      </button>
+
+      <button class="primary" onclick="saveDay()">
+        Guardar cambios
+      </button>
     </div>
   `;
 
   document.getElementById("modal").classList.add("show");
 }
 
+function captureEditDayDraft(){
+  if(!editDayDraft)return;
+
+  editDayDraft.forEach((x,i)=>{
+    const t=document.getElementById("t"+i);
+    const d=document.getElementById("d"+i);
+    const c=document.getElementById("c"+i);
+
+    if(t)x[0]=t.value;
+    if(d)x[1]=d.value;
+    if(c)x[2]=c.value;
+  });
+}
+
 function addDayBlock(){
-  state.customSchedule[state.day].push([
+  captureEditDayDraft();
+
+  editDayDraft.push([
     "09:00",
     "Nuevo bloque",
     "admin"
   ]);
 
-  save();
-  openEditDay();
+  renderEditDay();
 }
 
 function removeDayBlock(i){
+  captureEditDayDraft();
+
   if(!confirm("¿Eliminar este bloque?"))return;
 
-  state.customSchedule[state.day].splice(i,1);
+  editDayDraft.splice(i,1);
 
-  save();
-  openEditDay();
+  renderEditDay();
 }
 
 function saveDay(){
-  let arr=state.customSchedule[state.day];
+  captureEditDayDraft();
 
-  arr.forEach((x,i)=>{
-    x[0]=document.getElementById("t"+i).value;
-    x[1]=document.getElementById("d"+i).value;
-    x[2]=document.getElementById("c"+i).value;
-  });
+  state.customSchedule[state.day]=editDayDraft.map(x=>[...x]);
 
   save();
+  editDayDraft=null;
+
   closeModal();
   render();
+
   toast("Horario actualizado");
+}
+
+function cancelEditDay(){
+  editDayDraft=null;
+  closeModal();
 }
 function closeModal(){document.getElementById("modal").classList.remove("show")}
 function render(){
