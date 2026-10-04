@@ -279,12 +279,112 @@ async function ask(){
 }
 function removeGym(){state.customSchedule[state.day]=state.customSchedule[state.day].filter(x=>!x[1].toUpperCase().includes("GYM ·"));save();render();toast("Gym quitado de hoy")}
 function openEditDay(){
- let arr=state.customSchedule[state.day];
- document.getElementById("sheet").innerHTML=`<button class="close" onclick="closeModal()">✕</button><h2>Editar ${state.day}</h2><p class="small">Puedes cambiar texto, hora o categoría. Los cambios quedan guardados en este navegador.</p>${arr.map((x,i)=>`<div class="field"><label>Bloque ${i+1}</label><input id="t${i}" value="${esc(x[0])}"><input id="d${i}" value="${esc(x[1])}" style="margin-top:5px"></div>`).join("")}<div class="actions"><button class="secondary" onclick="closeModal()">Cancelar</button><button class="primary" onclick="saveDay()">Guardar cambios</button></div>`;
- document.getElementById("modal").classList.add("show");
+  let arr=state.customSchedule[state.day];
+
+  document.getElementById("sheet").innerHTML=`
+    <button class="close" onclick="closeModal()">✕</button>
+
+    <h2>Editar ${state.day}</h2>
+
+    <p class="small">
+      Puedes cambiar hora, texto y categoría. También puedes agregar o eliminar bloques.
+    </p>
+
+    <div id="editBlocks">
+      ${arr.map((x,i)=>`
+        <div class="field" style="border:1px solid #ddd;border-radius:12px;padding:10px;margin-bottom:12px">
+
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <label>Bloque ${i+1}</label>
+
+            <button
+              class="secondary"
+              onclick="removeDayBlock(${i})"
+              style="padding:6px 9px">
+              🗑️
+            </button>
+          </div>
+
+          <input
+            id="t${i}"
+            value="${esc(x[0])}"
+            placeholder="Hora"
+          >
+
+          <input
+            id="d${i}"
+            value="${esc(x[1])}"
+            placeholder="Descripción"
+            style="margin-top:5px"
+          >
+
+          <select
+            id="c${i}"
+            style="margin-top:5px"
+            onchange="">
+            <option value="admin" ${x[2]==="admin"?"selected":""}>📋 Administrativo</option>
+            <option value="comida" ${x[2]==="comida"?"selected":""}>🍎 Comida</option>
+            <option value="gym" ${x[2]==="gym"?"selected":""}>🏋️ Gym</option>
+            <option value="med" ${x[2]==="med"?"selected":""}>💊 Medicamentos</option>
+            <option value="trabajo" ${x[2]==="trabajo"?"selected":""}>💼 Trabajo</option>
+            <option value="traslado" ${x[2]==="traslado"?"selected":""}>🚗 Traslado</option>
+            <option value="descanso" ${x[2]==="descanso"?"selected":""}>🌿 Descanso</option>
+          </select>
+
+        </div>
+      `).join("")}
+    </div>
+
+    <button
+      class="secondary"
+      onclick="addDayBlock()"
+      style="width:100%;margin-top:4px">
+      ＋ Agregar bloque
+    </button>
+
+    <div class="actions">
+      <button class="secondary" onclick="closeModal()">Cancelar</button>
+      <button class="primary" onclick="saveDay()">Guardar cambios</button>
+    </div>
+  `;
+
+  document.getElementById("modal").classList.add("show");
 }
+
+function addDayBlock(){
+  state.customSchedule[state.day].push([
+    "09:00",
+    "Nuevo bloque",
+    "admin"
+  ]);
+
+  save();
+  openEditDay();
+}
+
+function removeDayBlock(i){
+  if(!confirm("¿Eliminar este bloque?"))return;
+
+  state.customSchedule[state.day].splice(i,1);
+
+  save();
+  openEditDay();
+}
+
 function saveDay(){
- let arr=state.customSchedule[state.day];arr.forEach((x,i)=>{x[0]=document.getElementById("t"+i).value;x[1]=document.getElementById("d"+i).value});save();closeModal();render();toast("Horario actualizado")}
+  let arr=state.customSchedule[state.day];
+
+  arr.forEach((x,i)=>{
+    x[0]=document.getElementById("t"+i).value;
+    x[1]=document.getElementById("d"+i).value;
+    x[2]=document.getElementById("c"+i).value;
+  });
+
+  save();
+  closeModal();
+  render();
+  toast("Horario actualizado");
+}
 function closeModal(){document.getElementById("modal").classList.remove("show")}
 function render(){
  document.getElementById("date").textContent=new Date().toLocaleDateString("es-MX",{weekday:"long",day:"numeric",month:"long"});
