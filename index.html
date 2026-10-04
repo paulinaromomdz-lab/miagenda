@@ -110,88 +110,97 @@ function dayView(){
 }
 function weekView(){return `<div class="card"><h2>🗓 Semana</h2><div class="grid">${DAYS.map(d=>`<div class="mini"><h3>${d}</h3><p class="small">${state.customSchedule[d].length} bloques · ${state.customSchedule[d].filter((x,i)=>state.done[key(d,i)]).length} completados</p><button class="secondary" onclick="setDay('${d}')">Ver día</button></div>`).join("")}</div></div>`}
 function mealsView(){
-  if(!state.meals){
-    state.meals=[
-      {name:"Desayuno",time:"08:00",desc:"Agrega aquí tu desayuno"},
-      {name:"Comida",time:"15:00",desc:"Agrega aquí tu comida"},
-      {name:"Cena",time:"20:00",desc:"Agrega aquí tu cena"}
-    ];
-    save();
-  }
+  const mealRegex=/DESAYUNO|COMIDA ·|CENA ·|COLACIÓN|MERIENDA/;
 
   return `
     <div class="card">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
         <h2>🍎 Comidas</h2>
-        <button class="primary" onclick="addMeal()">＋ Agregar</button>
       </div>
 
-      <div style="display:grid;gap:12px;margin-top:15px">
-        ${state.meals.map((m,i)=>`
-          <div class="card" style="border:1px solid #ddd">
-            <div style="display:flex;justify-content:space-between;align-items:start;gap:10px">
-              <div>
-                <h3 style="margin:0">${esc(m.name)}</h3>
-                <p class="small" style="margin:5px 0">${esc(m.time)}</p>
-                <p style="margin:5px 0">${esc(m.desc)}</p>
-              </div>
+      <div class="grid">
+        ${DAYS.map(d=>{
+          const meals=state.customSchedule[d]
+            .map((x,i)=>({x,i}))
+            .filter(({x})=>mealRegex.test(x[1]));
 
-              <div style="display:flex;gap:6px">
-                <button onclick="editMeal(${i})">✏️</button>
-                <button onclick="removeMeal(${i})">🗑️</button>
-              </div>
+          return `
+            <div class="mini">
+              <h3>${d}</h3>
+
+              <ul class="list">
+                ${meals.length
+                  ? meals.map(({x,i})=>`
+                    <li>
+                      <div style="flex:1">
+                        <span>${esc(x[0])}</span>
+                        <span>${esc(x[1])}</span>
+                      </div>
+
+                      <button
+                        class="secondary"
+                        onclick="editMeal('${d}',${i})"
+                        style="margin-left:6px">
+                        ✏️
+                      </button>
+                    </li>
+                  `).join("")
+                  : `<li><span class="small">Sin comidas registradas</span></li>`
+                }
+              </ul>
+
+              <button
+                class="primary"
+                onclick="addMeal('${d}')"
+                style="margin-top:10px">
+                ＋ Agregar comida
+              </button>
             </div>
-          </div>
-        `).join("")}
+          `;
+        }).join("")}
       </div>
     </div>
   `;
 }
-function addMeal(){
-  const name=prompt("Nombre de la comida:");
-  if(!name)return;
 
-  const time=prompt("Hora (ej. 08:00):","08:00");
-  const desc=prompt("¿Qué incluye?","");
+function editMeal(day,i){
+  const item=state.customSchedule[day][i];
 
-  state.meals.push({
-    name:name,
-    time:time||"",
-    desc:desc||""
-  });
-
-  save();
-  render();
-}
-
-function editMeal(i){
-  const m=state.meals[i];
-
-  const name=prompt("Nombre de la comida:",m.name);
-  if(name===null)return;
-
-  const time=prompt("Hora:",m.time);
+  const time=prompt("Hora:",item[0]);
   if(time===null)return;
 
-  const desc=prompt("¿Qué incluye?",m.desc);
-  if(desc===null)return;
+  const text=prompt("Comida:",item[1]);
+  if(text===null)return;
 
-  state.meals[i]={
-    name:name,
-    time:time,
-    desc:desc
-  };
+  item[0]=time.trim();
+  item[1]=text.trim();
 
   save();
   render();
+  toast("🍎 Comida actualizada");
 }
 
-function removeMeal(i){
-  if(!confirm("¿Eliminar esta comida?"))return;
+function addMeal(day){
+  const time=prompt("Hora de la comida:","08:00");
+  if(time===null)return;
 
-  state.meals.splice(i,1);
+  const text=prompt(
+    "¿Qué comida quieres agregar?",
+    "DESAYUNO · "
+  );
+  if(text===null)return;
+
+  if(!text.trim())return;
+
+  state.customSchedule[day].push([
+    time.trim(),
+    text.trim(),
+    "comida"
+  ]);
+
   save();
   render();
+  toast("🍎 Comida agregada");
 }
 function shoppingView(){
  let checks=state.shoppingDone||{};
