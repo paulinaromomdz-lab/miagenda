@@ -400,6 +400,8 @@ function getTaskAssignment(key){
   };
 }
 function tasksView(){
+  initTaskOrganization();
+
   state.hiddenBaseTasks=state.hiddenBaseTasks||{};
   state.tasksEditMode=state.tasksEditMode||false;
 
@@ -421,87 +423,211 @@ function tasksView(){
   });
 
   state.tasks.forEach((x,i)=>{
+    if(!x.id){
+      x.id="task_"+Date.now()+"_"+i;
+    }
+
     allTasks.unshift({
       type:"custom",
       index:i,
+      key:x.id,
       text:x.text,
       done:!!x.done
     });
   });
 
+  save();
+
   return `
     <div class="card">
 
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+      <div
+        style="
+          display:flex;
+          justify-content:space-between;
+          align-items:center;
+          gap:10px;
+        ">
+
         <h2 style="margin:0">✅ Pendientes</h2>
 
         <button
           class="${state.tasksEditMode?'primary':'secondary'}"
           onclick="toggleTasksEdit()">
-          ${state.tasksEditMode?'✓ Listo':'✏️ Editar'}
+
+          ${state.tasksEditMode
+            ? "✓ Listo"
+            : "✏️ Editar"
+          }
+
         </button>
+
       </div>
+
+      ${
+        state.tasksEditMode
+        ? `
+          <div
+            style="
+              display:flex;
+              gap:8px;
+              margin-top:12px;
+              flex-wrap:wrap;
+            ">
+
+            <button
+              class="secondary"
+              onclick="openTaskCategories()">
+              📂 Categorías
+            </button>
+
+            <button
+              class="secondary"
+              onclick="addTaskCategory()">
+              ＋ Nueva categoría
+            </button>
+
+          </div>
+        `
+        : ""
+      }
 
       <div style="margin-top:12px">
 
-        ${allTasks.length
-          ? allTasks.map(x=>`
+        ${
+          allTasks.length
+          ? allTasks.map(x=>{
 
-            <div
-              class="taskline"
-              style="
-                display:flex;
-                align-items:center;
-                justify-content:space-between;
-                gap:8px;
-                padding:10px 0;
-                border-bottom:1px solid #eee;
-              ">
+              const assignment=getTaskAssignment(x.key);
+              const category=getTaskCategory(assignment.categoryId);
 
-              <label
-                class="taskrow"
-                style="flex:1;display:flex;align-items:center;gap:8px">
+              return `
+                <div
+                  class="taskline"
+                  style="
+                    padding:10px 0;
+                    border-bottom:1px solid #eee;
+                  ">
 
-                <input
-                  type="checkbox"
-                  ${x.done?'checked':''}
-                  onchange="${
-                    x.type==="base"
-                    ? `toggle('${x.key}')`
-                    : `toggleCustom(${x.index})`
-                  }">
-
-                <span class="${x.done?'strike':''}">
-                  ${esc(x.text)}
-                </span>
-
-              </label>
-
-              ${state.tasksEditMode
-                ? `
-                  <button
-                    class="secondary"
-                    onclick="${
-                      x.type==="base"
-                      ? `removeBaseTask('${x.key}')`
-                      : `removeTask(${x.index})`
-                    }"
+                  <div
                     style="
-                      padding:5px 8px;
-                      min-width:38px;
-                      font-size:16px;
+                      display:flex;
+                      align-items:center;
+                      gap:8px;
                     ">
-                    🗑️
-                  </button>
-                `
-                : ""
-              }
 
-            </div>
+                    <input
+                      type="checkbox"
+                      ${x.done?'checked':''}
+                      onchange="${
+                        x.type==="base"
+                        ? `toggle('${x.key}')`
+                        : `toggleCustom(${x.index})`
+                      }">
 
-          `).join("")
+                    ${
+                      category
+                      ? `
+                        <span
+                          style="
+                            font-size:18px;
+                            background:${category.color};
+                            border-radius:8px;
+                            padding:3px 6px;
+                          ">
+                          ${category.icon}
+                        </span>
+                      `
+                      : ""
+                    }
+
+                    <span
+                      class="${x.done?'strike':''}"
+                      style="flex:1">
+                      ${esc(x.text)}
+                    </span>
+
+                  </div>
+
+                  ${
+                    state.tasksEditMode
+                    ? `
+                      <div
+                        style="
+                          display:flex;
+                          gap:6px;
+                          margin-top:7px;
+                          margin-left:30px;
+                        ">
+
+                        <select
+                          onchange="setTaskCategory('${x.key}',this.value)"
+                          style="flex:1">
+
+                          <option value="">
+                            Sin categoría
+                          </option>
+
+                          ${state.taskCategories.map(c=>`
+                            <option
+                              value="${c.id}"
+                              ${assignment.categoryId===c.id?"selected":""}>
+                              ${c.icon} ${esc(c.name)}
+                            </option>
+                          `).join("")}
+
+                        </select>
+
+                        ${
+                          category && category.useSubcategories
+                          ? `
+                            <select
+                              onchange="setTaskSubcategory('${x.key}',this.value)"
+                              style="flex:1">
+
+                              <option value="">
+                                Sin subcategoría
+                              </option>
+
+                              ${category.subcategories.map(s=>`
+                                <option
+                                  value="${s.id}"
+                                  ${assignment.subcategoryId===s.id?"selected":""}>
+                                  ${s.icon} ${esc(s.name)}
+                                </option>
+                              `).join("")}
+
+                            </select>
+                          `
+                          : ""
+                        }
+
+                        <button
+                          class="secondary"
+                          onclick="${
+                            x.type==="base"
+                            ? `removeBaseTask('${x.key}')`
+                            : `removeTask(${x.index})`
+                          }"
+                          style="
+                            padding:5px 8px;
+                            min-width:38px;
+                          ">
+                          🗑️
+                        </button>
+
+                      </div>
+                    `
+                    : ""
+                  }
+
+                </div>
+              `;
+            }).join("")
           : `
-            <p class="small" style="text-align:center">
+            <p
+              class="small"
+              style="text-align:center">
               No tienes pendientes todavía.
             </p>
           `
@@ -509,7 +635,10 @@ function tasksView(){
 
       </div>
 
-      <div class="row" style="margin-top:15px">
+      <div
+        class="row"
+        style="margin-top:15px">
+
         <input
           id="newTask"
           placeholder="Ej. Comprar croquetas">
@@ -519,12 +648,735 @@ function tasksView(){
           onclick="addTask()">
           Agregar
         </button>
+
       </div>
 
     </div>
   `;
 }
+function openTaskCategories(){
 
+  initTaskOrganization();
+
+  document.getElementById("sheet").innerHTML=`
+
+    <button class="close" onclick="closeModal()">✕</button>
+
+    <h2>📂 Categorías</h2>
+
+    <p class="small">
+      Las categorías son opcionales. Puedes usar solo una categoría,
+      crear subcategorías o dejar tus pendientes sin categoría.
+    </p>
+
+    <div style="margin-top:15px">
+
+      ${
+        state.taskCategories.length
+        ? state.taskCategories.map(c=>`
+
+          <div
+            style="
+              background:${c.color};
+              border-radius:14px;
+              padding:12px;
+              margin-bottom:10px;
+            ">
+
+            <div
+              style="
+                display:flex;
+                align-items:center;
+                gap:10px;
+              ">
+
+              <span style="font-size:25px">
+                ${c.icon}
+              </span>
+
+              <div style="flex:1">
+
+                <strong>${esc(c.name)}</strong>
+
+                ${
+                  c.useSubcategories
+                  ? `
+                    <div class="small">
+                      ${c.subcategories.length}
+                      subcategoría${c.subcategories.length===1?"":"s"}
+                    </div>
+                  `
+                  : `
+                    <div class="small">
+                      Sin subcategorías
+                    </div>
+                  `
+                }
+
+              </div>
+
+              <button
+                class="secondary"
+                onclick="editTaskCategory('${c.id}')"
+                style="padding:6px 9px">
+                ✏️
+              </button>
+
+              <button
+                class="secondary"
+                onclick="removeTaskCategory('${c.id}')"
+                style="padding:6px 9px">
+                🗑️
+              </button>
+
+            </div>
+
+          </div>
+
+        `).join("")
+        : `
+          <div
+            class="small"
+            style="
+              text-align:center;
+              padding:20px;
+            ">
+            Todavía no tienes categorías.
+          </div>
+        `
+      }
+
+    </div>
+
+    <button
+      class="primary"
+      onclick="addTaskCategory()"
+      style="
+        width:100%;
+        margin-top:8px;
+      ">
+      ＋ Crear categoría
+    </button>
+
+  `;
+
+  document.getElementById("modal").classList.add("show");
+}
+
+
+function addTaskCategory(){
+
+  editTaskCategory(null);
+
+}
+
+
+function editTaskCategory(id){
+
+  initTaskOrganization();
+
+  let category=id
+    ? getTaskCategory(id)
+    : null;
+
+  if(!category){
+
+    category={
+      id:"cat_"+Date.now(),
+      name:"",
+      icon:"📋",
+      color:TASK_COLORS[0],
+      useSubcategories:false,
+      subcategories:[]
+    };
+
+  }
+
+  const iconOptions=TASK_ICONS.map(icon=>`
+
+    <button
+      type="button"
+      onclick="selectTaskCategoryIcon('${icon}')"
+      id="taskIcon_${icon.codePointAt(0)}"
+      style="
+        width:42px;
+        height:42px;
+        padding:0;
+        font-size:22px;
+        border:1px solid #ddd;
+        border-radius:10px;
+        background:white;
+      ">
+      ${icon}
+    </button>
+
+  `).join("");
+
+
+  document.getElementById("sheet").innerHTML=`
+
+    <button
+      class="close"
+      onclick="openTaskCategories()">
+      ✕
+    </button>
+
+    <h2>
+      ${id ? "✏️ Editar categoría" : "➕ Nueva categoría"}
+    </h2>
+
+    <div class="field">
+
+      <label>Nombre</label>
+
+      <input
+        id="taskCategoryName"
+        value="${esc(category.name)}"
+        placeholder="Ej. Casa">
+
+    </div>
+
+
+    <div class="field">
+
+      <label>Icono</label>
+
+      <div
+        style="
+          display:grid;
+          grid-template-columns:repeat(6,1fr);
+          gap:7px;
+          margin-top:8px;
+        ">
+
+        ${iconOptions}
+
+      </div>
+
+      <input
+        type="hidden"
+        id="taskCategoryIcon"
+        value="${esc(category.icon)}">
+
+    </div>
+
+
+    <div class="field">
+
+      <label>Color</label>
+
+      <div
+        style="
+          display:flex;
+          flex-wrap:wrap;
+          gap:8px;
+          margin-top:8px;
+        ">
+
+        ${TASK_COLORS.map((color,i)=>`
+
+          <button
+            type="button"
+            onclick="selectTaskCategoryColor('${color}')"
+            style="
+              width:34px;
+              height:34px;
+              border-radius:50%;
+              border:2px solid white;
+              box-shadow:0 0 0 1px #bbb;
+              background:${color};
+            ">
+          </button>
+
+        `).join("")}
+
+      </div>
+
+      <input
+        type="hidden"
+        id="taskCategoryColor"
+        value="${category.color}">
+
+    </div>
+
+
+    <div
+      class="field"
+      style="
+        display:flex;
+        align-items:center;
+        gap:10px;
+      ">
+
+      <input
+        type="checkbox"
+        id="taskUseSubcategories"
+        ${category.useSubcategories?"checked":""}
+        style="width:20px;height:20px">
+
+      <label
+        for="taskUseSubcategories"
+        style="margin:0">
+        Usar subcategorías
+      </label>
+
+    </div>
+
+
+    ${
+      category.useSubcategories
+      ? `
+
+        <div
+          style="
+            margin-top:15px;
+            border-top:1px solid #eee;
+            padding-top:15px;
+          ">
+
+          <h3>Subcategorías</h3>
+
+          ${
+            category.subcategories.length
+            ? category.subcategories.map(s=>`
+
+              <div
+                style="
+                  display:flex;
+                  align-items:center;
+                  gap:8px;
+                  padding:8px 0;
+                  border-bottom:1px solid #eee;
+                ">
+
+                <span style="font-size:20px">
+                  ${s.icon}
+                </span>
+
+                <span style="flex:1">
+                  ${esc(s.name)}
+                </span>
+
+                <button
+                  class="secondary"
+                  onclick="editTaskSubcategory('${category.id}','${s.id}')"
+                  style="padding:5px 8px">
+                  ✏️
+                </button>
+
+                <button
+                  class="secondary"
+                  onclick="removeTaskSubcategory('${category.id}','${s.id}')"
+                  style="padding:5px 8px">
+                  🗑️
+                </button>
+
+              </div>
+
+            `).join("")
+            : `
+              <p class="small">
+                Todavía no hay subcategorías.
+              </p>
+            `
+          }
+
+          <button
+            class="secondary"
+            onclick="addTaskSubcategory('${category.id}')"
+            style="width:100%;margin-top:10px">
+            ＋ Agregar subcategoría
+          </button>
+
+        </div>
+
+      `
+      : ""
+    }
+
+
+    <div class="actions">
+
+      <button
+        class="secondary"
+        onclick="openTaskCategories()">
+        Cancelar
+      </button>
+
+      <button
+        class="primary"
+        onclick="saveTaskCategory('${category.id}')">
+        Guardar
+      </button>
+
+    </div>
+
+  `;
+
+  document.getElementById("modal").classList.add("show");
+
+  window.currentTaskCategory=category;
+
+}
+
+
+function selectTaskCategoryIcon(icon){
+
+  const input=document.getElementById("taskCategoryIcon");
+
+  if(input){
+    input.value=icon;
+  }
+
+}
+
+
+function selectTaskCategoryColor(color){
+
+  const input=document.getElementById("taskCategoryColor");
+
+  if(input){
+    input.value=color;
+  }
+
+}
+
+
+function saveTaskCategory(id){
+
+  const name=document
+    .getElementById("taskCategoryName")
+    .value
+    .trim();
+
+  if(!name){
+
+    toast("Escribe un nombre para la categoría");
+
+    return;
+  }
+
+  const icon=document
+    .getElementById("taskCategoryIcon")
+    .value;
+
+  const color=document
+    .getElementById("taskCategoryColor")
+    .value;
+
+  const useSubcategories=document
+    .getElementById("taskUseSubcategories")
+    .checked;
+
+
+  let category=getTaskCategory(id);
+
+  if(!category){
+
+    category={
+      id:id,
+      name:name,
+      icon:icon||"📋",
+      color:color||TASK_COLORS[0],
+      useSubcategories:useSubcategories,
+      subcategories:[]
+    };
+
+    state.taskCategories.push(category);
+
+  }else{
+
+    category.name=name;
+    category.icon=icon||"📋";
+    category.color=color||TASK_COLORS[0];
+    category.useSubcategories=useSubcategories;
+
+  }
+
+  save();
+
+  openTaskCategories();
+
+}
+
+
+function removeTaskCategory(id){
+
+  const category=getTaskCategory(id);
+
+  if(!category)return;
+
+  if(!confirm(
+    "¿Eliminar la categoría \""+
+    category.name+
+    "\"?"
+  ))return;
+
+
+  state.taskCategories=
+    state.taskCategories.filter(c=>c.id!==id);
+
+
+  Object.keys(state.taskCategoryAssignments||{})
+    .forEach(key=>{
+
+      if(
+        state.taskCategoryAssignments[key].categoryId===id
+      ){
+
+        delete state.taskCategoryAssignments[key];
+
+      }
+
+    });
+
+
+  save();
+
+  openTaskCategories();
+
+  toast("Categoría eliminada");
+
+}
+
+
+function addTaskSubcategory(categoryId){
+
+  const category=getTaskCategory(categoryId);
+
+  if(!category)return;
+
+  category.subcategories=category.subcategories||[];
+
+  const subcategory={
+    id:"sub_"+Date.now(),
+    name:"",
+    icon:"📋"
+  };
+
+  category.subcategories.push(subcategory);
+
+  save();
+
+  editTaskSubcategory(
+    categoryId,
+    subcategory.id
+  );
+
+}
+
+
+function editTaskSubcategory(categoryId,subcategoryId){
+
+  const category=getTaskCategory(categoryId);
+
+  if(!category)return;
+
+  const subcategory=
+    category.subcategories.find(
+      s=>s.id===subcategoryId
+    );
+
+  if(!subcategory)return;
+
+
+  document.getElementById("sheet").innerHTML=`
+
+    <button
+      class="close"
+      onclick="editTaskCategory('${categoryId}')">
+      ✕
+    </button>
+
+    <h2>📂 Subcategoría</h2>
+
+    <div class="field">
+
+      <label>Nombre</label>
+
+      <input
+        id="taskSubcategoryName"
+        value="${esc(subcategory.name)}"
+        placeholder="Ej. Limpieza">
+
+    </div>
+
+    <div class="field">
+
+      <label>Icono</label>
+
+      <div
+        style="
+          display:grid;
+          grid-template-columns:repeat(6,1fr);
+          gap:7px;
+          margin-top:8px;
+        ">
+
+        ${TASK_ICONS.map(icon=>`
+
+          <button
+            type="button"
+            onclick="document.getElementById('taskSubcategoryIcon').value='${icon}'"
+            style="
+              width:42px;
+              height:42px;
+              padding:0;
+              font-size:22px;
+              border:1px solid #ddd;
+              border-radius:10px;
+              background:white;
+            ">
+            ${icon}
+          </button>
+
+        `).join("")}
+
+      </div>
+
+      <input
+        type="hidden"
+        id="taskSubcategoryIcon"
+        value="${esc(subcategory.icon)}">
+
+    </div>
+
+    <div class="actions">
+
+      <button
+        class="secondary"
+        onclick="editTaskCategory('${categoryId}')">
+        Cancelar
+      </button>
+
+      <button
+        class="primary"
+        onclick="saveTaskSubcategory('${categoryId}','${subcategoryId}')">
+        Guardar
+      </button>
+
+    </div>
+
+  `;
+
+}
+
+
+function saveTaskSubcategory(categoryId,subcategoryId){
+
+  const category=getTaskCategory(categoryId);
+
+  if(!category)return;
+
+  const subcategory=
+    category.subcategories.find(
+      s=>s.id===subcategoryId
+    );
+
+  if(!subcategory)return;
+
+
+  const name=document
+    .getElementById("taskSubcategoryName")
+    .value
+    .trim();
+
+  if(!name){
+
+    toast("Escribe un nombre");
+
+    return;
+  }
+
+
+  subcategory.name=name;
+
+  subcategory.icon=
+    document.getElementById("taskSubcategoryIcon").value
+    ||"📋";
+
+
+  save();
+
+  editTaskCategory(categoryId);
+
+}
+
+
+function removeTaskSubcategory(categoryId,subcategoryId){
+
+  const category=getTaskCategory(categoryId);
+
+  if(!category)return;
+
+  if(!confirm("¿Eliminar esta subcategoría?"))return;
+
+
+  category.subcategories=
+    category.subcategories.filter(
+      s=>s.id!==subcategoryId
+    );
+
+
+  Object.keys(state.taskCategoryAssignments||{})
+    .forEach(key=>{
+
+      if(
+        state.taskCategoryAssignments[key].subcategoryId===
+        subcategoryId
+      ){
+
+        state.taskCategoryAssignments[key].subcategoryId="";
+
+      }
+
+    });
+
+
+  save();
+
+  editTaskCategory(categoryId);
+
+}
+
+
+function setTaskCategory(key,categoryId){
+
+  initTaskOrganization();
+
+  state.taskCategoryAssignments[key]={
+    categoryId:categoryId,
+    subcategoryId:""
+  };
+
+  save();
+
+  render();
+
+}
+
+
+function setTaskSubcategory(key,subcategoryId){
+
+  initTaskOrganization();
+
+  if(!state.taskCategoryAssignments[key]){
+
+    state.taskCategoryAssignments[key]={
+      categoryId:"",
+      subcategoryId:""
+    };
+
+  }
+
+  state.taskCategoryAssignments[key].subcategoryId=
+    subcategoryId;
+
+  save();
+
+  render();
+
+}
 function toggleTasksEdit(){
   state.tasksEditMode=!state.tasksEditMode;
   save();
