@@ -181,15 +181,44 @@ function dayView(){
   let arr=state.customSchedule[state.day];
 
   return `
-    ${toolbar()}
+   <div class="toolbar">
+  <div class="left">
+    <button class="round" onclick="setDay(DAYS[(DAYS.indexOf(state.day)+6)%7])">‹</button>
 
-    <div style="display:flex;justify-content:flex-end;margin-bottom:10px">
-      <button
-        class="secondary"
-        onclick="toggleIcons()">
-        ${state.showIcons ? "👁️ Iconos activados" : "🚫 Iconos ocultos"}
-      </button>
-    </div>
+    <div class="day">${state.day}</div>
+
+    <button class="round" onclick="setDay(DAYS[(DAYS.indexOf(state.day)+1)%7])">›</button>
+  </div>
+
+  <div style="display:flex;align-items:center;gap:5px">
+
+    <button
+      class="primary"
+      onclick="openEditDay()">
+      ✏️ Editar día
+    </button>
+
+    <button
+      class="secondary"
+      onclick="toggleIcons()"
+      aria-label="Mostrar u ocultar iconos"
+      title="Mostrar u ocultar iconos"
+      style="
+        width:38px;
+        height:38px;
+        padding:0;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        font-size:18px;
+      ">
+      ${state.showIcons ? "👁️" : "🚫"}
+    </button>
+
+  </div>
+</div>
+
+
 
     ${nowCard()}
 
