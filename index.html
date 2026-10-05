@@ -362,6 +362,43 @@ function shoppingView(){
  return `<div class="card"><h2>🛒 Lista de compras</h2><div class="grid">${Object.entries(shopping).map(([h,a])=>`<div class="mini"><h3>${h}</h3><ul class="list">${a.map((x,i)=>{let k=h+i;return `<li><input type="checkbox" ${checks[k]?'checked':''} onchange="shop('${k}')"><span class="${checks[k]?'strike':''}">${x}</span></li>`}).join("")}</ul></div>`).join("")}</div></div>`;
 }
 function shop(k){state.shoppingDone=state.shoppingDone||{};state.shoppingDone[k]=!state.shoppingDone[k];save();render()}
+function initTaskOrganization(){
+  state.taskCategories=state.taskCategories||[];
+  state.taskCategoryAssignments=state.taskCategoryAssignments||{};
+  state.taskViewMode=state.taskViewMode||"list";
+}
+
+const TASK_ICONS=[
+  "📋","🏠","🐶","🐱","💰","📚","💼","🧠","❤️","🩺",
+  "🛒","🎨","🎵","🎬","✈️","🌱","🏋️","🍎","🚗","🧹",
+  "🔧","🌸","🎓","📱","💻","📅","✨","⭐","🎯","🧘"
+];
+
+const TASK_COLORS=[
+  "#F9D5E5",
+  "#D8F3DC",
+  "#DDEBF7",
+  "#FFF1B6",
+  "#E8DFF5",
+  "#FCE1C7",
+  "#D9F0F0",
+  "#EAD7F5",
+  "#F5E1A4",
+  "#DDE5B6"
+];
+
+function getTaskCategory(id){
+  initTaskOrganization();
+  return state.taskCategories.find(c=>c.id===id)||null;
+}
+
+function getTaskAssignment(key){
+  initTaskOrganization();
+  return state.taskCategoryAssignments[key]||{
+    categoryId:"",
+    subcategoryId:""
+  };
+}
 function tasksView(){
   state.hiddenBaseTasks=state.hiddenBaseTasks||{};
   state.tasksEditMode=state.tasksEditMode||false;
