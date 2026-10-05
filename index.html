@@ -208,12 +208,181 @@ function shoppingView(){
 }
 function shop(k){state.shoppingDone=state.shoppingDone||{};state.shoppingDone[k]=!state.shoppingDone[k];save();render()}
 function tasksView(){
- return `<div class="card"><h2>✅ Pendientes</h2><div class="grid">${Object.entries(baseTasks).map(([h,a])=>`<div class="mini"><h3>${h}</h3><ul class="list">${a.map((x,i)=>{let k="base_"+h+"_"+i;return `<li><input type="checkbox" ${state.done[k]?'checked':''} onchange="toggle('${k}')"><span class="${state.done[k]?'strike':''}">${x}</span></li>`}).join("")}</ul></div>`).join("")}</div></div>
- <div class="card"><h2>➕ Pendientes nuevos</h2>${state.tasks.map((x,i)=>`<div class="taskline"><label class="taskrow"><input type="checkbox" ${x.done?'checked':''} onchange="toggleCustom(${i})"><span class="${x.done?'strike':''}">${esc(x.text)}</span></label><button class="secondary" onclick="removeTask(${i})">Eliminar</button></div>`).join("")}<div class="row"><input id="newTask" placeholder="Ej. Comprar croquetas"><button class="primary" onclick="addTask()">Agregar</button></div></div>`;
+  state.hiddenBaseTasks=state.hiddenBaseTasks||{};
+  state.tasksEditMode=state.tasksEditMode||false;
+
+  let allTasks=[];
+
+  Object.entries(baseTasks).forEach(([h,a])=>{
+    a.forEach((x,i)=>{
+      let key="base_"+h+"_"+i;
+
+      if(!state.hiddenBaseTasks[key]){
+        allTasks.push({
+          type:"base",
+          key:key,
+          text:x,
+          done:!!state.done[key]
+        });
+      }
+    });
+  });
+
+  state.tasks.forEach((x,i)=>{
+    allTasks.unshift({
+      type:"custom",
+      index:i,
+      text:x.text,
+      done:!!x.done
+    });
+  });
+
+  return `
+    <div class="card">
+
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+        <h2 style="margin:0">✅ Pendientes</h2>
+
+        <button
+          class="${state.tasksEditMode?'primary':'secondary'}"
+          onclick="toggleTasksEdit()">
+          ${state.tasksEditMode?'✓ Listo':'✏️ Editar'}
+        </button>
+      </div>
+
+      <div style="margin-top:12px">
+
+        ${allTasks.length
+          ? allTasks.map(x=>`
+
+            <div
+              class="taskline"
+              style="
+                display:flex;
+                align-items:center;
+                justify-content:space-between;
+                gap:8px;
+                padding:10px 0;
+                border-bottom:1px solid #eee;
+              ">
+
+              <label
+                class="taskrow"
+                style="flex:1;display:flex;align-items:center;gap:8px">
+
+                <input
+                  type="checkbox"
+                  ${x.done?'checked':''}
+                  onchange="${
+                    x.type==="base"
+                    ? `toggle('${x.key}')`
+                    : `toggleCustom(${x.index})`
+                  }">
+
+                <span class="${x.done?'strike':''}">
+                  ${esc(x.text)}
+                </span>
+
+              </label>
+
+              ${state.tasksEditMode
+                ? `
+                  <button
+                    class="secondary"
+                    onclick="${
+                      x.type==="base"
+                      ? `removeBaseTask('${x.key}')`
+                      : `removeTask(${x.index})`
+                    }"
+                    style="
+                      padding:5px 8px;
+                      min-width:38px;
+                      font-size:16px;
+                    ">
+                    🗑️
+                  </button>
+                `
+                : ""
+              }
+
+            </div>
+
+          `).join("")
+          : `
+            <p class="small" style="text-align:center">
+              No tienes pendientes todavía.
+            </p>
+          `
+        }
+
+      </div>
+
+      <div class="row" style="margin-top:15px">
+        <input
+          id="newTask"
+          placeholder="Ej. Comprar croquetas">
+
+        <button
+          class="primary"
+          onclick="addTask()">
+          Agregar
+        </button>
+      </div>
+
+    </div>
+  `;
 }
-function addTask(){let v=document.getElementById("newTask").value.trim();if(v){state.tasks.push({text:v,done:false});save();render();toast("Pendiente agregado")}}
-function toggleCustom(i){state.tasks[i].done=!state.tasks[i].done;save();render()}
-function removeTask(i){state.tasks.splice(i,1);save();render()}
+
+function toggleTasksEdit(){
+  state.tasksEditMode=!state.tasksEditMode;
+  save();
+  render();
+}
+
+function removeBaseTask(key){
+  if(!confirm("¿Eliminar este pendiente?"))return;
+
+  state.hiddenBaseTasks=state.hiddenBaseTasks||{};
+  state.hiddenBaseTasks[key]=true;
+
+  save();
+  render();
+
+  toast("Pendiente eliminado");
+}
+
+function addTask(){
+  let v=document.getElementById("newTask").value.trim();
+
+  if(!v)return;
+
+  state.tasks.unshift({
+    text:v,
+    done:false
+  });
+
+  save();
+  render();
+
+  toast("Pendiente agregado");
+}
+
+function toggleCustom(i){
+  state.tasks[i].done=!state.tasks[i].done;
+  save();
+  render();
+}
+
+function removeTask(i){
+  if(!confirm("¿Eliminar este pendiente?"))return;
+
+  state.tasks.splice(i,1);
+
+  save();
+  render();
+
+  toast("Pendiente eliminado");
+}
 function gymView(){
  return `<div class="card"><h2>🏋️ Entrenamiento S.O.N.</h2><p class="small"><b>Calentamiento:</b> dinámico 10 min o isométrico 5 min. Incluye pre-movilidad general, cardio coordinativo, estabilidad central y pre-activación muscular.</p><p class="small"><b>Cadencia:</b> 2-5-2. <b>Descanso:</b> 30 s. Nunca al fallo. 8–15 reps: mantén peso; &gt;15: aumenta; &lt;8: reduce.</p></div>${Object.entries(workouts).map(([d,a])=>`<div class="card"><h2>Días ${d}</h2><div class="exercise head"><div>Ejercicio</div><div>Tiempo</div><div>Reps</div></div>${a.map(x=>`<div class="exercise"><div>${x[0]}</div><div>${x[1]}</div><div>${x[2]}</div></div>`).join("")}</div>`).join("")}`;
 }
