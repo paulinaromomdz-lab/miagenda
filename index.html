@@ -1617,9 +1617,368 @@ function removeTask(i){
 
   toast("Pendiente eliminado");
 }
-function gymView(){
- return `<div class="card"><h2>🏋️ Entrenamiento S.O.N.</h2><p class="small"><b>Calentamiento:</b> dinámico 10 min o isométrico 5 min. Incluye pre-movilidad general, cardio coordinativo, estabilidad central y pre-activación muscular.</p><p class="small"><b>Cadencia:</b> 2-5-2. <b>Descanso:</b> 30 s. Nunca al fallo. 8–15 reps: mantén peso; &gt;15: aumenta; &lt;8: reduce.</p></div>${Object.entries(workouts).map(([d,a])=>`<div class="card"><h2>Días ${d}</h2><div class="exercise head"><div>Ejercicio</div><div>Tiempo</div><div>Reps</div></div>${a.map(x=>`<div class="exercise"><div>${x[0]}</div><div>${x[1]}</div><div>${x[2]}</div></div>`).join("")}</div>`).join("")}`;
+function initGymState(){
+  if(!state.gymGroups){
+    state.gymGroups=Object.entries(workouts).map(([title,exercises],i)=>({
+      id:"gym_"+Date.now()+"_"+i,
+      title:"Días "+title,
+      exercises:JSON.parse(JSON.stringify(exercises))
+    }));
+  }
+
+  if(state.gymWarmup===undefined){
+    state.gymWarmup="Dinámico 10 min o isométrico 5 min. Incluye pre-movilidad general, cardio coordinativo, estabilidad central y pre-activación muscular.";
+  }
+
+  state.gymEditMode=!!state.gymEditMode;
 }
+
+function toggleGymEdit(){
+  initGymState();
+  state.gymEditMode=!state.gymEditMode;
+  save();
+  render();
+}
+
+function openGymWarmupEditor(){
+  initGymState();
+
+  document.getElementById("sheet").innerHTML=`
+    <button class="close" onclick="closeModal()">✕</button>
+    <h2>🔥 Editar calentamiento</h2>
+
+    <div class="field">
+      <label>Calentamiento</label>
+      <textarea id="gymWarmupInput" style="width:100%;min-height:150px;padding:10px;border:1px solid #ccd6da;border-radius:11px;resize:vertical;">${esc(state.gymWarmup)}</textarea>
+    </div>
+
+    <div class="actions">
+      <button class="secondary" onclick="closeModal()">Cancelar</button>
+      <button class="primary" onclick="saveGymWarmup()">Guardar</button>
+    </div>`;
+    
+  document.getElementById("modal").classList.add("show");
+}
+
+function saveGymWarmup(){
+  state.gymWarmup=document.getElementById("gymWarmupInput").value.trim();
+  save();
+  closeModal();
+  render();
+  toast("Calentamiento actualizado");
+}
+
+function openGymGroupEditor(id){
+  initGymState();
+
+  const group=id
+    ? state.gymGroups.find(g=>g.id===id)
+    : {title:"",exercises:[]};
+
+  if(!group)return;
+
+  document.getElementById("sheet").innerHTML=`
+    <button class="close" onclick="closeModal()">✕</button>
+    <h2>${id ? "✏️ Editar bloque" : "➕ Nuevo bloque"}</h2>
+
+    <div class="field">
+      <label>Título del bloque</label>
+      <input id="gymGroupTitle"
+        value="${esc(group.title)}"
+        placeholder="Ej. Días 1–3">
+    </div>
+
+    <div class="actions">
+      <button class="secondary" onclick="closeModal()">Cancelar</button>
+      <button class="primary" onclick="saveGymGroup(${JSON.stringify(id)})">Guardar</button>
+    </div>`;
+    
+  document.getElementById("modal").classList.add("show");
+}
+
+function saveGymGroup(id){
+  const title=document.getElementById("gymGroupTitle").value.trim();
+
+  if(!title){
+    toast("Escribe un título para el bloque");
+    return;
+  }
+
+  if(id){
+    const group=state.gymGroups.find(g=>g.id===id);
+    if(group)group.title=title;
+  }else{
+    state.gymGroups.push({
+      id:"gym_"+Date.now(),
+      title:title,
+      exercises:[]
+    });
+  }
+
+  save();
+  closeModal();
+  render();
+  toast("Bloque actualizado");
+}
+
+function removeGymGroup(id){
+  const group=state.gymGroups.find(g=>g.id===id);
+
+  if(!group)return;
+
+  if(!confirm("¿Eliminar el bloque \""+group.title+"\"?"))return;
+
+  state.gymGroups=state.gymGroups.filter(g=>g.id!==id);
+
+  save();
+  render();
+  toast("Bloque eliminado");
+}
+
+function openGymExerciseEditor(groupId,index){
+  initGymState();
+
+  const group=state.gymGroups.find(g=>g.id===groupId);
+
+  if(!group)return;
+
+  const exercise=index>=0
+    ? group.exercises[index]
+    : ["","",""];
+
+  if(!exercise)return;
+
+  document.getElementById("sheet").innerHTML=`
+    <button class="close" onclick="closeModal()">✕</button>
+
+    <h2>${index>=0 ? "✏️ Editar ejercicio" : "➕ Nuevo ejercicio"}</h2>
+
+    <div class="field">
+      <label>Ejercicio</label>
+      <input id="gymExerciseName"
+        value="${esc(exercise[0]||"")}"
+        placeholder="Ej. Caminadora">
+    </div>
+
+    <div class="field">
+      <label>Tiempo</label>
+      <input id="gymExerciseTime"
+        value="${esc(exercise[1]||"")}"
+        placeholder="Ej. 15 min">
+    </div>
+
+    <div class="field">
+      <label>Repeticiones</label>
+      <input
+        id="gymExerciseReps"
+        list="gymRepsOptions"
+        value="${esc(exercise[2]||"")}"
+        placeholder="Ej. 8–15 o NA">
+
+      <datalist id="gymRepsOptions">
+        <option value="NA"></option>
+        <option value="8–15"></option>
+        <option value="Las que salgan"></option>
+      </datalist>
+
+      <div class="small" style="margin-top:5px">
+        Para cardio puedes usar <b>NA</b>.
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="secondary" onclick="closeModal()">Cancelar</button>
+      <button class="primary" onclick="saveGymExercise(${JSON.stringify(groupId)},${index})">Guardar</button>
+    </div>`;
+    
+  document.getElementById("modal").classList.add("show");
+}
+
+function saveGymExercise(groupId,index){
+  const group=state.gymGroups.find(g=>g.id===groupId);
+
+  if(!group)return;
+
+  const name=document.getElementById("gymExerciseName").value.trim();
+  const time=document.getElementById("gymExerciseTime").value.trim();
+  const reps=document.getElementById("gymExerciseReps").value.trim();
+
+  if(!name){
+    toast("Escribe el nombre del ejercicio");
+    return;
+  }
+
+  const exercise=[name,time,reps];
+
+  if(index>=0){
+    group.exercises[index]=exercise;
+  }else{
+    group.exercises.push(exercise);
+  }
+
+  save();
+  closeModal();
+  render();
+  toast("Ejercicio guardado");
+}
+
+function addGymExercise(groupId){
+  openGymExerciseEditor(groupId,-1);
+}
+
+function removeGymExercise(groupId,index){
+  const group=state.gymGroups.find(g=>g.id===groupId);
+
+  if(!group)return;
+
+  if(!confirm("¿Eliminar este ejercicio?"))return;
+
+  group.exercises.splice(index,1);
+
+  save();
+  render();
+  toast("Ejercicio eliminado");
+}
+
+function gymView(){
+  initGymState();
+
+  const edit=state.gymEditMode;
+
+  return `
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+        <h2 style="margin:0">🏋️ Entrenamiento</h2>
+
+        <button
+          class="secondary"
+          onclick="toggleGymEdit()"
+          style="padding:6px 9px;font-size:11px;border-radius:10px;">
+          ${edit ? "✓ Listo" : "✏️ Editar"}
+        </button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;align-items:center;gap:7px;margin-bottom:8px;">
+        <h2 style="margin:0;flex:1">🔥 Calentamiento</h2>
+
+        ${edit ? `
+          <button
+            class="secondary"
+            onclick="openGymWarmupEditor()"
+            style="padding:4px 7px;font-size:11px;">
+            ✏️
+          </button>
+        ` : ""}
+      </div>
+
+      <p class="small" style="margin:0">
+        ${esc(state.gymWarmup)}
+      </p>
+
+      <p class="small" style="margin:10px 0 0">
+        <b>Cadencia:</b> 2-5-2 ·
+        <b>Descanso:</b> 30 s ·
+        Nunca al fallo.
+      </p>
+    </div>
+
+    ${state.gymGroups.map(group=>`
+      <div class="card">
+
+        <div style="display:flex;align-items:center;gap:7px;margin-bottom:10px;">
+
+          <h2 style="margin:0;flex:1">
+            ${esc(group.title)}
+          </h2>
+
+          ${edit ? `
+            <button
+              class="secondary"
+              onclick="openGymGroupEditor(${JSON.stringify(group.id)})"
+              style="padding:4px 7px;font-size:11px;">
+              ✏️
+            </button>
+
+            <button
+              class="secondary"
+              onclick="removeGymGroup(${JSON.stringify(group.id)})"
+              style="padding:4px 7px;font-size:11px;">
+              🗑️
+            </button>
+          ` : ""}
+        </div>
+
+        <div class="exercise head">
+          <div>Ejercicio</div>
+          <div>Tiempo</div>
+          <div>Reps</div>
+        </div>
+
+        ${
+          group.exercises.length
+          ? group.exercises.map((x,i)=>`
+            <div class="exercise">
+
+              <div style="display:flex;align-items:center;gap:5px;min-width:0;">
+
+                <span style="flex:1">
+                  ${esc(x[0])}
+                </span>
+
+                ${edit ? `
+                  <button
+                    class="secondary"
+                    onclick="openGymExerciseEditor(${JSON.stringify(group.id)},${i})"
+                    style="padding:3px 6px;font-size:10px;">
+                    ✏️
+                  </button>
+
+                  <button
+                    class="secondary"
+                    onclick="removeGymExercise(${JSON.stringify(group.id)},${i})"
+                    style="padding:3px 6px;font-size:10px;">
+                    🗑️
+                  </button>
+                ` : ""}
+              </div>
+
+              <div>${esc(x[1])}</div>
+              <div>${esc(x[2])}</div>
+
+            </div>
+          `).join("")
+          : `
+            <div class="empty">
+              Todavía no hay ejercicios en este bloque.
+            </div>
+          `
+        }
+
+        ${edit ? `
+          <button
+            class="secondary"
+            onclick="addGymExercise(${JSON.stringify(group.id)})"
+            style="width:100%;margin-top:10px;">
+            ＋ Agregar ejercicio
+          </button>
+        ` : ""}
+
+      </div>
+    `).join("")}
+
+    ${edit ? `
+      <button
+        class="secondary"
+        onclick="openGymGroupEditor(null)"
+        style="width:100%;margin-top:2px;">
+        ＋ Agregar bloque
+      </button>
+    ` : ""}
+  `;
+}
+
 function aiView(){
  return `<div class="card"><h2>✨ Organiza mi día</h2><p class="small">Esta versión ya puede interpretar algunas instrucciones sin conexión. La siguiente fase puede conectar una IA real para modificar tu horario mediante conversación.</p><textarea id="aiq" placeholder="Ej.: No voy al gym hoy y necesito hacer compras antes de las 7."></textarea><div class="actions"><button class="primary" onclick="ask()">Organizar</button><button class="secondary" onclick="setTab('day')">Volver a hoy</button></div><div id="answer"></div></div>`;
 }
