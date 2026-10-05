@@ -81,13 +81,80 @@ const supabaseClient = window.supabase.createClient(
 <script>
 const DAYS=["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"];
 const COLORS={comida:"food",trabajo:"work",gym:"gym",med:"med",libre:"free",casa:"home",sueno:"sleep",admin:"admin"};
+const ICONS={
+  reloj:"⏰",
+  comida:"🍎",
+  gym:"🏋️",
+  medicamentos:"💊",
+  trabajo:"💼",
+  casa:"🏠",
+  descanso:"🌿",
+  recreacion:"🎨",
+  educacion:"📚",
+  social:"👥",
+  autocuidado:"🧖🏻‍♀️",
+  balanza:"⚖️",
+  libro:"📖",
+  vela:"🕯️",
+  ducha:"🚿",
+  coche:"🚗",
+  perro:"🐶",
+  gato:"🐱",
+  conversacion:"💬",
+  banderas:"🚩",
+  pareja:"❤️",
+  medico:"👩‍⚕️",
+  psicologia:"🧠",
+  plantas:"🌱",
+  compras:"🛒",
+  musica:"🎵",
+  pelicula:"🎬",
+  viaje:"✈️",
+  cafe:"☕",
+  dormir:"💤",
+  meditacion:"🧘",
+  pendiente:"📝",
+  llamada:"📞",
+  celebracion:"🎉"
+};
+
+const DEFAULT_ICONS={
+  comida:"🍎",
+  trabajo:"💼",
+  gym:"🏋️",
+  med:"💊",
+  libre:"🌿",
+  casa:"🏠",
+  sueno:"💤",
+  admin:"📋",
+  traslado:"🚗",
+  recreacion:"🎨",
+  educacion:"📚",
+  social:"👥",
+  autocuidado:"🧖🏻‍♀️"
+};
+
+function getActivityIcon(item){
+  return item[3] || DEFAULT_ICONS[item[2]] || "📌";
+}
 const LS="paulina_horario_v2";
 const defaultSchedule = {"Lunes": [["8:00–8:10", "Despertar · Alarmy", "admin"], ["8:10–8:25", "Medicamentos + té de manzanilla", "med"], ["8:25–8:40", "COLACIÓN 1 · Avena hidratada", "comida"], ["8:40–8:55", "Preparar omelet + té de canela", "comida"], ["8:55–9:15", "DESAYUNO · Omelet de espinacas + té de canela", "comida"], ["9:15–9:30", "Preparar lunch + bolsa", "admin"], ["9:30–11:00", "Traslado al consultorio", "gym"], ["11:00–11:30", "Preparativos del trabajo", "trabajo"], ["11:30–14:10", "Trabajo / pacientes", "trabajo"], ["14:30–15:00", "COMIDA · Avena + pollo + verduras al vapor", "comida"], ["15:00–17:00", "Trabajo / pacientes", "trabajo"], ["17:00–18:30", "Regreso a casa", "gym"], ["18:30–18:50", "Perros + cambio", "casa"], ["18:50–19:10", "Traslado al gym", "gym"], ["19:10–20:00", "GYM · entrenamiento", "gym"], ["20:00–20:20", "Ducha + regreso", "gym"], ["20:20–20:40", "CENA · Brócoli + 180 g carne de res", "comida"], ["20:40–21:10", "PREP · dejar listo martes", "comida"], ["21:10–22:30", "Tiempo libre / descanso", "libre"], ["22:30–23:30", "Rutina de sueño", "sueno"]], "Martes": [["8:00–8:10", "Despertar · Alarmy", "admin"], ["8:10–8:25", "Medicamentos + té de manzanilla", "med"], ["8:25–8:40", "COLACIÓN 1 · Avena hidratada", "comida"], ["8:40–8:55", "Preparar omelet + té de canela", "comida"], ["8:55–9:15", "DESAYUNO · Omelet de espinacas + té de canela", "comida"], ["9:15–9:45", "Preparar espacio + pendientes", "admin"], ["10:00–14:00", "Trabajo / pacientes", "trabajo"], ["14:00–14:25", "COMIDA · Avena + pollo + verduras al vapor", "comida"], ["14:25–14:45", "Preparar gym + cambio", "gym"], ["14:45–15:05", "Traslado al gym", "gym"], ["15:05–15:50", "GYM · entrenamiento", "gym"], ["15:50–16:00", "Ducha + regreso", "gym"], ["16:00–21:00", "Trabajo / pacientes", "trabajo"], ["21:00–21:20", "Perros", "casa"], ["21:20–21:40", "CENA · Brócoli + 180 g carne de res", "comida"], ["21:40–22:10", "PREP · dejar listo miércoles", "comida"], ["22:10–22:30", "Tiempo libre / descanso", "libre"], ["22:30–23:30", "Rutina de sueño", "sueno"]], "Miércoles": [["8:00–8:10", "Despertar · Alarmy", "admin"], ["8:10–8:25", "Medicamentos + té de manzanilla", "med"], ["8:25–8:40", "COLACIÓN 1 · Avena hidratada", "comida"], ["8:40–8:55", "Preparar yogur + fresas + chía", "comida"], ["8:55–9:15", "DESAYUNO · Yogur griego + fresas + chía", "comida"], ["9:15–9:30", "Traslado al gym", "gym"], ["9:30–10:15", "GYM · entrenamiento", "gym"], ["10:15–10:35", "Ducha + arreglarse", "gym"], ["10:35–11:05", "Preparar salida + pendientes", "admin"], ["11:05–12:00", "Traslado al consultorio", "gym"], ["12:00–16:00", "Trabajo / pacientes", "trabajo"], ["16:00–17:30", "Regreso a casa", "gym"], ["17:30–17:50", "Perros", "casa"], ["17:50–18:15", "COMIDA · Ensalada con 3 huevos + algas/espinacas + panela", "comida"], ["18:15–19:45", "Tiempo libre / descanso", "libre"], ["19:45–20:05", "CENA · Omelet de espinacas", "comida"], ["20:05–20:25", "PREP · dejar lista colación del jueves", "comida"], ["20:25–20:45", "Tiempo libre / descanso", "libre"], ["20:45–21:05", "Preparar jueves · ropa + bolsa", "admin"], ["22:30–23:30", "Rutina de sueño", "sueno"]], "Jueves": [["8:00–8:10", "Despertar · Alarmy", "admin"], ["8:10–8:25", "Medicamentos + té de manzanilla", "med"], ["8:25–8:40", "COLACIÓN 1 · Avena hidratada", "comida"], ["8:40–8:55", "Preparar yogur + fresas + chía", "comida"], ["8:55–9:15", "DESAYUNO · Yogur griego + fresas + chía", "comida"], ["9:15–9:30", "Traslado al gym", "gym"], ["9:30–10:15", "GYM · entrenamiento", "gym"], ["10:15–10:35", "Ducha + regreso", "gym"], ["10:35–10:50", "Preparar comida + espacio de trabajo", "admin"], ["10:50–11:10", "COLACIÓN · Pera + 10 almendras", "comida"], ["11:10–11:45", "Historia / aprendizaje personal", "libre"], ["11:45–12:15", "COMIDA · Pollo + espinacas + camote", "comida"], ["12:15–12:35", "Preparar trabajo", "trabajo"], ["13:00–20:00", "Trabajo / pacientes", "trabajo"], ["20:00–21:15", "Extensión de trabajo si aplica", "trabajo"], ["21:15–21:35", "Perros", "casa"], ["21:35–21:55", "CENA · Ensalada de atún con apio", "comida"], ["21:55–22:15", "PREP · dejar listo viernes", "comida"], ["22:15–22:30", "Tiempo libre / descanso", "libre"], ["22:30–23:30", "Rutina de sueño", "sueno"]], "Viernes": [["8:00–8:10", "Despertar · Alarmy", "admin"], ["8:10–8:25", "Medicamentos", "med"], ["8:25–8:40", "COLACIÓN 1 · Avena hidratada", "comida"], ["8:40–8:55", "Preparar yogur + fresas + chía", "comida"], ["8:55–9:15", "DESAYUNO · Yogur griego + fresas + chía", "comida"], ["9:15–9:45", "Preparar trabajo", "admin"], ["10:00–11:00", "Trabajo", "trabajo"], ["11:00–14:00", "Círculo de lectura", "trabajo"], ["14:00–14:30", "COMIDA · Pollo + espinacas + camote", "comida"], ["14:30–17:00", "Trabajo", "trabajo"], ["17:00–17:20", "Preparar gym + colación", "gym"], ["17:20–18:05", "GYM · sesión corta", "gym"], ["18:05–18:25", "Ducha + regreso", "gym"], ["18:25–18:45", "PREP · dejar listo atún + apio + hojas verdes", "comida"], ["18:45–19:10", "COLACIÓN · Semillas de girasol + fresa", "comida"], ["19:10–19:35", "CENA · Ensalada de atún con apio", "comida"], ["19:35–22:30", "Tiempo libre / descanso", "libre"], ["22:30–23:30", "Rutina de sueño", "sueno"]], "Sábado": [["8:00–8:10", "Despertar · Alarmy", "admin"], ["8:10–8:25", "Medicamentos", "med"], ["8:25–8:40", "COLACIÓN 1 · Avena hidratada", "comida"], ["8:40–8:55", "Preparar hotcakes + frutos rojos", "comida"], ["8:55–9:15", "DESAYUNO · Hotcakes de avena + miel + frutos rojos", "comida"], ["9:15–9:30", "Traslado al gym", "gym"], ["9:30–10:15", "GYM · entrenamiento", "gym"], ["10:15–10:35", "Ducha + regreso", "gym"], ["10:35–11:10", "PREP · batido + proteína + pescado, arroz y ensalada", "comida"], ["11:10–11:30", "COLACIÓN · Batido de plátano y almendras", "comida"], ["11:30–12:30", "Tarea de casa / mensual", "casa"], ["12:30–13:00", "Compras", "admin"], ["13:00–14:00", "COMIDA · Pescado + arroz integral + ensalada", "comida"], ["14:00–14:15", "PREP · yogur + chispas de chocolate", "comida"], ["14:15–14:30", "MERIENDA · Yogur + chocolate amargo", "comida"], ["14:30–19:30", "Tiempo libre / descanso", "libre"], ["19:30–20:00", "PREP · pollo + lechuga + jitomate + pepino", "comida"], ["20:00–20:25", "CENA · Ensalada de pollo con aderezo de yogur", "comida"], ["20:25–22:30", "Tiempo libre / descanso", "libre"], ["22:30–23:30", "Rutina de sueño", "sueno"]], "Domingo": [["8:00–8:10", "Despertar · Alarmy", "admin"], ["8:10–8:25", "Medicamentos", "med"], ["8:25–8:40", "COLACIÓN 1 · Avena hidratada", "comida"], ["8:40–8:55", "Preparar tostadas + aguacate + jitomate", "comida"], ["8:55–9:15", "DESAYUNO · Tostadas de aguacate y apio", "comida"], ["9:15–9:30", "Traslado al gym", "gym"], ["9:30–10:15", "GYM · movilidad + cardio suave", "gym"], ["10:15–10:35", "Ducha + regreso", "gym"], ["10:35–11:15", "Compras", "admin"], ["11:15–12:30", "PREP SEMANAL · avena, huevos, nopales/verduras y porciones", "comida"], ["12:30–12:50", "COLACIÓN · Kiwi + queso panela", "comida"], ["12:50–13:10", "Guardar alimentos + limpiar cocina", "casa"], ["13:10–13:40", "COMIDA · Pescado + hojas verdes + pepita", "comida"], ["13:40–14:00", "PREP · gelatina + tortilla + pepino", "comida"], ["14:00–14:15", "COLACIÓN · Gelatina", "comida"], ["14:15–14:40", "Finanzas / pagos", "admin"], ["14:40–15:25", "Revisar semana", "admin"], ["15:25–15:45", "CENA · Tortilla integral + panela + pepino", "comida"], ["15:45–18:00", "Ropa + bolsa de gym", "admin"], ["18:00–20:00", "Tiempo libre / descanso", "libre"], ["20:00–21:00", "Cierre de semana", "admin"], ["21:00–22:30", "Rutina de sueño", "sueno"]]};
 const shopping = {"Proteínas":["Huevo","Pollo","Pescado blanco","Pavo","Atún","Carne"],"Verduras":["Espinaca","Brócoli","Hojas verdes","Pepino","Jitomate","Zanahoria","Chayote","Calabaza","Apio","Jícama","Nopal"],"Frutas":["Fresa","Mango","Pera","Kiwi","Plátano","Manzana","Frutos rojos","Limón"],"Refrigerados":["Yogur griego","Leche de almendra","Queso panela"],"Despensa":["Avena","Chía","Almendras","Pistaches","Semillas de calabaza","Semillas de girasol","Crema de cacahuate/almendra","Chocolate 85%","Tostadas/tortillas integrales"]};
 const baseTasks={"Casa":["Lavar platos","Limpiar terraza","Jardín / plantas","Recoger y ordenar","Sacar basura","Organizar ropa / cómodas","Limpieza profunda con Martita","Limpieza general · miércoles","Mantener casa al día","Tener efectivo para agua / basura","Mantenimiento / reparaciones","Servicios"],"Perros":["Alimentar","Baño","Vacunas","Veterinario / cuidados"],"Finanzas y Admin":["Pagar maestría","Actualizar portal de consulta","Pagar seguro médico","Pagar tarjetas","Pagar servicios","Pagar terapia de mamá","Revisar finanzas propias","Organizar pagos","Revisar finanzas de Límbico con Nat","Citas médicas / seguimiento"]};
 const workouts={"1–3":[["Elevación de rodillas","11 min","Las que salgan"],["Oblicuos en barra","11 min","Las que salgan"],["Laterales de mancuernas","11 min","8–15"],["Deltoide posterior máquina","11 min","8–15"],["Deltoide frontal","11 min","8–15"],["Bícep martillo","11 min","8–15"],["Barra Z abierta","11 min","8–15"],["Extensión de trícep barra recta","11 min","8–15"],["Extensión de trícep","11 min","8–15"],["Copa polea","11 min","8–15"]],"4–6":[["Press de pierna","15 min","8–15"],["Hack squat","16 min","8–15"],["Extensión de pierna","15 min","8–15"],["Extensión de pierna puntas al frente","16 min","8–15"],["Abductor máquina","15 min","8–15"],["Aductor máquina","16 min","8–15"],["Hip thrust","15 min","8–15"]],"7–9":[["Gemelo sentado","13 min","8–15"],["Femoral sentado","13 min","8–15"],["Press de pecho inclinado Smith","14 min","8–15"],["Press de pecho plano","14 min","8–15"],["Jalón supino","13 min","8–15"],["Remo supino","13 min","8–15"],["Remo cerrado","14 min","8–15"],["Encogimiento inclinado","14 min","8–15"]]};
 
-let state=JSON.parse(localStorage.getItem(LS)||"null")||{day:null,tab:"day",done:{},tasks:[],customSchedule:defaultSchedule};
+let state=JSON.parse(localStorage.getItem(LS)||"null")||{
+  day:null,
+  tab:"day",
+  done:{},
+  tasks:[],
+  customSchedule:defaultSchedule,
+  showIcons:true
+};
+
+if(typeof state.showIcons!=="boolean"){
+  state.showIcons=true;
+}
 const jsDay=(new Date().getDay()+6)%7;
 if(!state.day)state.day=DAYS[jsDay];
 function save(){localStorage.setItem(LS,JSON.stringify(state))}
@@ -104,9 +171,68 @@ function nowCard(){
  let x=idx>=0?arr[idx]:null;
  return `<div class="now"><div class="label">SIGUIENTE</div>${x?`<h2>${esc(x[1])}</h2><p>${esc(x[0])} · toca el bloque para marcarlo como terminado</p>`:`<h2>🎉 Día completo</h2><p>No quedan bloques sin marcar.</p>`}</div>`
 }
+function toggleIcons(){
+  state.showIcons=!state.showIcons;
+  save();
+  render();
+}
+
 function dayView(){
- let arr=state.customSchedule[state.day];
- return toolbar()+nowCard()+`<div>${arr.map((x,i)=>`<div class="item ${COLORS[x[2]]} ${state.done[key(state.day,i)]?'done':''}" onclick="toggle('${key(state.day,i)}')"><div class="time">${esc(x[0])}</div><div class="desc">${esc(x[1])}</div><button class="check" onclick="event.stopPropagation();toggle('${key(state.day,i)}')">${state.done[key(state.day,i)]?'✓':'○'}</button></div>`).join("")}</div>`;
+  let arr=state.customSchedule[state.day];
+
+  return `
+    ${toolbar()}
+
+    <div style="display:flex;justify-content:flex-end;margin-bottom:10px">
+      <button
+        class="secondary"
+        onclick="toggleIcons()">
+        ${state.showIcons ? "👁️ Iconos activados" : "🚫 Iconos ocultos"}
+      </button>
+    </div>
+
+    ${nowCard()}
+
+    <div>
+      ${arr.map((x,i)=>`
+        <div
+          class="item ${COLORS[x[2]]||''} ${state.done[key(state.day,i)]?'done':''}"
+          onclick="toggle('${key(state.day,i)}')">
+
+          <div class="time">
+            ${esc(x[0])}
+          </div>
+
+          <div class="desc">
+
+            ${state.showIcons
+              ? `<span
+                  style="
+                    font-size:20px;
+                    margin-right:8px;
+                    flex-shrink:0;
+                  ">
+                  ${getActivityIcon(x)}
+                </span>`
+              : ""
+            }
+
+            <span>
+              ${esc(x[1])}
+            </span>
+
+          </div>
+
+          <button
+            class="check"
+            onclick="event.stopPropagation();toggle('${key(state.day,i)}')">
+            ${state.done[key(state.day,i)]?'✓':'○'}
+          </button>
+
+        </div>
+      `).join("")}
+    </div>
+  `;
 }
 function weekView(){return `<div class="card"><h2>🗓 Semana</h2><div class="grid">${DAYS.map(d=>`<div class="mini"><h3>${d}</h3><p class="small">${state.customSchedule[d].length} bloques · ${state.customSchedule[d].filter((x,i)=>state.done[key(d,i)]).length} completados</p><button class="secondary" onclick="setDay('${d}')">Ver día</button></div>`).join("")}</div></div>`}
 function mealsView(){
