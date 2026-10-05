@@ -402,22 +402,22 @@ function getTaskAssignment(key){
 
 function tasksView(){
   initTaskOrganization();
-
   state.hiddenBaseTasks=state.hiddenBaseTasks||{};
-  state.tasksEditMode=state.tasksEditMode||false;
+  state.tasksEditMode=!!state.tasksEditMode;
 
-  let allTasks=[];
+  const allTasks=[];
 
   Object.entries(baseTasks).forEach(([h,a])=>{
     a.forEach((x,i)=>{
-      let key="base_"+h+"_"+i;
+      const key="base_"+h+"_"+i;
 
       if(!state.hiddenBaseTasks[key]){
         allTasks.push({
           type:"base",
           key:key,
           text:x,
-          done:!!state.done[key]
+          done:!!state.done[key],
+          index:i
         });
       }
     });
@@ -428,7 +428,7 @@ function tasksView(){
       x.id="task_"+Date.now()+"_"+i;
     }
 
-    allTasks.unshift({
+    allTasks.push({
       type:"custom",
       index:i,
       key:x.id,
@@ -439,6 +439,251 @@ function tasksView(){
 
   save();
 
+  const general=allTasks.filter(x=>{
+    return !getTaskCategory(
+      getTaskAssignment(x.key).categoryId
+    );
+  });
+
+  const categories=state.taskCategories.map(c=>({
+    category:c,
+    tasks:allTasks.filter(x=>{
+      return getTaskAssignment(x.key).categoryId===c.id;
+    })
+  }));
+
+  function taskRow(x,category){
+
+    const assignment=getTaskAssignment(x.key);
+
+    const hasSubs=
+      category &&
+      category.useSubcategories &&
+      category.subcategories.length;
+
+    return `
+      <div
+        class="taskline"
+        style="
+          padding:10px 0;
+          border-bottom:1px solid #eee;
+        "
+      >
+
+        <div
+          style="
+            display:flex;
+            align-items:center;
+            gap:8px;
+          "
+        >
+
+          <input
+            type="checkbox"
+            ${x.done?'checked':''}
+            onchange="${
+              x.type==="base"
+              ? `toggle('${x.key}')`
+              : `toggleCustom(${x.index})`
+            }"
+          >
+
+          <span
+            class="${x.done?'strike':''}"
+            style="flex:1"
+          >
+            ${esc(x.text)}
+          </span>
+
+        </div>
+
+        ${
+          state.tasksEditMode
+          ? `
+            <div
+              style="
+                display:flex;
+                gap:6px;
+                margin-top:7px;
+                margin-left:30px;
+                flex-wrap:wrap;
+              "
+            >
+
+              <select
+                onchange="setTaskCategory('${x.key}',this.value)"
+                style="
+                  flex:1;
+                  min-width:140px;
+                "
+              >
+
+                <option value="">
+                  📋 Pendientes generales
+                </option>
+
+                ${
+                  state.taskCategories.map(c=>`
+
+                    <option
+                      value="${c.id}"
+                      ${
+                        assignment.categoryId===c.id
+                        ? "selected"
+                        : ""
+                      }
+                    >
+                      ${c.icon} ${esc(c.name)}
+                    </option>
+
+                  `).join("")
+                }
+
+              </select>
+
+              ${
+                hasSubs
+                ? `
+                  <select
+                    onchange="setTaskSubcategory('${x.key}',this.value)"
+                    style="
+                      flex:1;
+                      min-width:140px;
+                    "
+                  >
+
+                    <option value="">
+                      Sin subcategoría
+                    </option>
+
+                    ${
+                      category.subcategories.map(s=>`
+
+                        <option
+                          value="${s.id}"
+                          ${
+                            assignment.subcategoryId===s.id
+                            ? "selected"
+                            : ""
+                          }
+                        >
+                          ${s.icon} ${esc(s.name)}
+                        </option>
+
+                      `).join("")
+                    }
+
+                  </select>
+                `
+                : ""
+              }
+
+              <button
+                class="secondary"
+                onclick="${
+                  x.type==="base"
+                  ? `removeBaseTask('${x.key}')`
+                  : `removeTask(${x.index})`
+                }"
+                style="
+                  padding:5px 8px;
+                  min-width:38px;
+                "
+              >
+                🗑️
+              </button>
+
+            </div>
+          `
+          : ""
+        }
+
+      </div>
+    `;
+  }
+
+
+  function taskBlock(
+    title,
+    icon,
+    color,
+    tasks,
+    category
+  ){
+
+    return `
+      <div
+        style="
+          margin-top:18px;
+          border:1px solid #eee;
+          border-radius:16px;
+          overflow:hidden;
+          background:#fff;
+        "
+      >
+
+        <div
+          style="
+            background:${color||'#f7f7f7'};
+            padding:12px 14px;
+            display:flex;
+            align-items:center;
+            gap:8px;
+          "
+        >
+
+          <span style="font-size:22px">
+            ${icon}
+          </span>
+
+          <strong style="flex:1">
+            ${esc(title)}
+          </strong>
+
+          <span class="small">
+            ${tasks.length}
+          </span>
+
+        </div>
+
+        <div style="padding:0 14px;">
+
+          ${
+            tasks.length
+            ? tasks
+                .map(x=>taskRow(x,category))
+                .join("")
+            : `
+              <p
+                class="small"
+                style="
+                  text-align:center;
+                  padding:15px 0;
+                "
+              >
+                No hay pendientes aquí todavía.
+              </p>
+            `
+          }
+
+          <button
+            class="secondary"
+            onclick="addTaskToCategory('${category?category.id:''}')"
+            style="
+              width:100%;
+              margin:12px 0;
+            "
+          >
+            ＋ Agregar pendiente
+          </button>
+
+        </div>
+
+      </div>
+    `;
+  }
+
+
   return `
     <div class="card">
 
@@ -448,22 +693,26 @@ function tasksView(){
           justify-content:space-between;
           align-items:center;
           gap:10px;
-        ">
+        "
+      >
 
-        <h2 style="margin:0">✅ Pendientes</h2>
+        <h2 style="margin:0">
+          ✅ Pendientes
+        </h2>
 
         <button
           class="${state.tasksEditMode?'primary':'secondary'}"
-          onclick="toggleTasksEdit()">
-
-          ${state.tasksEditMode
+          onclick="toggleTasksEdit()"
+        >
+          ${
+            state.tasksEditMode
             ? "✓ Listo"
             : "✏️ Editar"
           }
-
         </button>
 
       </div>
+
 
       ${
         state.tasksEditMode
@@ -474,17 +723,20 @@ function tasksView(){
               gap:8px;
               margin-top:12px;
               flex-wrap:wrap;
-            ">
+            "
+          >
 
             <button
               class="secondary"
-              onclick="openTaskCategories()">
+              onclick="openTaskCategories()"
+            >
               📂 Categorías
             </button>
 
             <button
               class="secondary"
-              onclick="addTaskCategory()">
+              onclick="addTaskCategory()"
+            >
               ＋ Nueva categoría
             </button>
 
@@ -493,160 +745,47 @@ function tasksView(){
         : ""
       }
 
-      <div style="margin-top:12px">
 
-        ${
-          allTasks.length
-          ? allTasks.map(x=>{
+      ${
+        taskBlock(
+          "Pendientes generales",
+          "📋",
+          "#f4f4f4",
+          general,
+          null
+        )
+      }
 
-              const assignment=getTaskAssignment(x.key);
-              const category=getTaskCategory(assignment.categoryId);
 
-              return `
-                <div
-                  class="taskline"
-                  style="
-                    padding:10px 0;
-                    border-bottom:1px solid #eee;
-                  ">
+      ${
+        categories
+          .map(({category,tasks})=>
+            taskBlock(
+              category.name,
+              category.icon,
+              category.color,
+              tasks,
+              category
+            )
+          )
+          .join("")
+      }
 
-                  <div
-                    style="
-                      display:flex;
-                      align-items:center;
-                      gap:8px;
-                    ">
-
-                    <input
-                      type="checkbox"
-                      ${x.done?'checked':''}
-                      onchange="${
-                        x.type==="base"
-                        ? `toggle('${x.key}')`
-                        : `toggleCustom(${x.index})`
-                      }">
-
-                    ${
-                      category
-                      ? `
-                        <span
-                          style="
-                            font-size:18px;
-                            background:${category.color};
-                            border-radius:8px;
-                            padding:3px 6px;
-                          ">
-                          ${category.icon}
-                        </span>
-                      `
-                      : ""
-                    }
-
-                    <span
-                      class="${x.done?'strike':''}"
-                      style="flex:1">
-                      ${esc(x.text)}
-                    </span>
-
-                  </div>
-
-                  ${
-                    state.tasksEditMode
-                    ? `
-                      <div
-                        style="
-                          display:flex;
-                          gap:6px;
-                          margin-top:7px;
-                          margin-left:30px;
-                        ">
-
-                        <select
-                          onchange="setTaskCategory('${x.key}',this.value)"
-                          style="flex:1">
-
-                          <option value="">
-                            Sin categoría
-                          </option>
-
-                          ${state.taskCategories.map(c=>`
-                            <option
-                              value="${c.id}"
-                              ${assignment.categoryId===c.id?"selected":""}>
-                              ${c.icon} ${esc(c.name)}
-                            </option>
-                          `).join("")}
-
-                        </select>
-
-                        ${
-                          category && category.useSubcategories
-                          ? `
-                            <select
-                              onchange="setTaskSubcategory('${x.key}',this.value)"
-                              style="flex:1">
-
-                              <option value="">
-                                Sin subcategoría
-                              </option>
-
-                              ${category.subcategories.map(s=>`
-                                <option
-                                  value="${s.id}"
-                                  ${assignment.subcategoryId===s.id?"selected":""}>
-                                  ${s.icon} ${esc(s.name)}
-                                </option>
-                              `).join("")}
-
-                            </select>
-                          `
-                          : ""
-                        }
-
-                        <button
-                          class="secondary"
-                          onclick="${
-                            x.type==="base"
-                            ? `removeBaseTask('${x.key}')`
-                            : `removeTask(${x.index})`
-                          }"
-                          style="
-                            padding:5px 8px;
-                            min-width:38px;
-                          ">
-                          🗑️
-                        </button>
-
-                      </div>
-                    `
-                    : ""
-                  }
-
-                </div>
-              `;
-            }).join("")
-          : `
-            <p
-              class="small"
-              style="text-align:center">
-              No tienes pendientes todavía.
-            </p>
-          `
-        }
-
-      </div>
 
       <div
         class="row"
-        style="margin-top:15px">
+        style="margin-top:15px;"
+      >
 
         <input
           id="newTask"
-          placeholder="Ej. Comprar croquetas">
+          placeholder="Ej. Comprar croquetas"
+        >
 
         <button
           class="primary"
-          onclick="addTask()">
+          onclick="addTask()"
+        >
           Agregar
         </button>
 
@@ -654,6 +793,44 @@ function tasksView(){
 
     </div>
   `;
+}
+
+
+function addTaskToCategory(categoryId){
+
+  const category=
+    categoryId
+    ? getTaskCategory(categoryId)
+    : null;
+
+  const text=prompt(
+    category
+    ? `Nuevo pendiente en ${category.icon} ${category.name}:`
+    : "Nuevo pendiente:",
+    ""
+  );
+
+  if(text===null || !text.trim())return;
+
+  const item={
+    text:text.trim(),
+    done:false,
+    id:"task_"+Date.now()
+  };
+
+  state.tasks.unshift(item);
+
+  initTaskOrganization();
+
+  state.taskCategoryAssignments[item.id]={
+    categoryId:categoryId||"",
+    subcategoryId:""
+  };
+
+  save();
+  render();
+
+  toast("Pendiente agregado");
 }
 function openTaskCategories(){
 
