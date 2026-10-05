@@ -399,35 +399,7 @@ function getTaskAssignment(key){
     subcategoryId:""
   };
 }
-function initTaskOrganization(){
-  state.taskCategories=state.taskCategories||[];
-  state.taskCategoryAssignments=state.taskCategoryAssignments||{};
-  state.taskViewMode=state.taskViewMode||"list";
-}
 
-const TASK_ICONS=[
-  "📋","🏠","🐶","🐱","💰","📚","💼","🧠","❤️","🩺",
-  "🛒","🎨","🎵","🎬","✈️","🌱","🏋️","🍎","🚗","🧹",
-  "🔧","🌸","🎓","📱","💻","📅","✨","⭐","🎯","🧘"
-];
-
-const TASK_COLORS=[
-  "#F9D5E5",
-  "#D8F3DC",
-  "#DDEBF7",
-  "#FFF1B6",
-  "#E8DFF5",
-  "#FCE1C7",
-  "#D9F0F0",
-  "#EAD7F5",
-  "#F5E1A4",
-  "#DDE5B6"
-];
-
-function getTaskCategory(id){
-  initTaskOrganization();
-  return state.taskCategories.find(c=>c.id===id)||null;
-}
 
 function getTaskAssignment(key){
   initTaskOrganization();
