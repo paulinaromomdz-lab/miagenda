@@ -582,7 +582,62 @@ function openEditDay(){
 }
 
 function renderEditDay(){
-  const arr = editDayDraft || [];
+  const arr=editDayDraft||[];
+
+  const iconOptions=[
+    ["","Sin icono"],
+    ["⏰","Reloj"],
+    ["🍎","Comida"],
+    ["🏋️","Gym"],
+    ["💊","Medicamentos"],
+    ["💼","Trabajo"],
+    ["🏠","Casa"],
+    ["🌿","Descanso"],
+    ["🎨","Recreación"],
+    ["📚","Educación"],
+    ["👥","Social"],
+    ["🧖🏻‍♀️","Autocuidado"],
+    ["⚖️","Balanza"],
+    ["📖","Libro"],
+    ["🕯️","Vela"],
+    ["🚿","Ducha"],
+    ["🚗","Coche"],
+    ["🐶","Perro"],
+    ["🐱","Gato"],
+    ["💬","Conversación"],
+    ["🚩","Banderas"],
+    ["❤️","Pareja / amor"],
+    ["👩‍⚕️","Médico"],
+    ["🧠","Psicología"],
+    ["🌱","Plantas"],
+    ["🛒","Compras"],
+    ["🎵","Música"],
+    ["🎬","Película / serie"],
+    ["✈️","Viaje"],
+    ["☕","Café"],
+    ["💤","Dormir"],
+    ["🧘","Meditación"],
+    ["📝","Pendiente"],
+    ["📞","Llamada"],
+    ["🎉","Celebración"],
+    ["🍷","Vino"],
+    ["🐾","Mascotas"],
+    ["📱","Celular"],
+    ["💻","Computadora"],
+    ["🧹","Limpieza"],
+    ["🍳","Cocinar"],
+    ["🧺","Ropa"],
+    ["🌳","Naturaleza"],
+    ["🏥","Hospital"],
+    ["💰","Dinero"],
+    ["🎓","Universidad"],
+    ["🎧","Escuchar música"],
+    ["🎮","Videojuegos"],
+    ["📺","Televisión"],
+    ["📕","Lectura"],
+    ["🗓️","Planificación"],
+    ["✨","Especial"]
+  ];
 
   document.getElementById("sheet").innerHTML=`
     <button class="close" onclick="cancelEditDay()">✕</button>
@@ -590,87 +645,124 @@ function renderEditDay(){
     <h2>Editar ${state.day}</h2>
 
     <p class="small">
-      Puedes cambiar hora, texto y categoría. Los cambios se guardan cuando pulses “Guardar cambios”.
+      Personaliza cada actividad. Puedes cambiar su nombre, categoría e icono,
+      agregar nuevas actividades o eliminarlas.
     </p>
 
     <div id="editBlocks">
-      ${arr.map((x,i)=>`
-        <div class="field" style="border:1px solid #ddd;border-radius:12px;padding:10px;margin-bottom:12px">
 
-          <div style="display:flex;justify-content:space-between;align-items:center">
-            <label>Bloque ${i+1}</label>
+      ${arr.map((x,i)=>{
 
-            <button
-              class="secondary"
-              onclick="removeDayBlock(${i})"
-              style="padding:6px 9px">
-              🗑️
-            </button>
+        const currentIcon=x[3]||getActivityIcon(x);
+
+        return `
+          <div
+            class="field"
+            style="
+              border:1px solid #ddd;
+              border-radius:14px;
+              padding:12px;
+              margin-bottom:12px;
+            ">
+
+            <div
+              style="
+                display:flex;
+                justify-content:space-between;
+                align-items:center;
+                margin-bottom:8px;
+              ">
+
+              <label>Bloque ${i+1}</label>
+
+              <button
+                class="secondary"
+                onclick="removeDayBlock(${i})"
+                style="padding:6px 9px">
+                🗑️
+              </button>
+
+            </div>
+
+            <input
+              id="t${i}"
+              value="${esc(x[0])}"
+              placeholder="Hora">
+
+            <input
+              id="d${i}"
+              value="${esc(x[1])}"
+              placeholder="Nombre de la actividad"
+              style="margin-top:6px">
+
+            <select
+              id="c${i}"
+              style="margin-top:6px">
+
+              <option value="admin" ${x[2]==="admin"?"selected":""}>
+                📋 Administrativo
+              </option>
+
+              <option value="comida" ${x[2]==="comida"?"selected":""}>
+                🍎 Comida
+              </option>
+
+              <option value="gym" ${x[2]==="gym"?"selected":""}>
+                🏋️ Gym
+              </option>
+
+              <option value="med" ${x[2]==="med"?"selected":""}>
+                💊 Medicamentos
+              </option>
+
+              <option value="trabajo" ${x[2]==="trabajo"?"selected":""}>
+                💼 Trabajo
+              </option>
+
+              <option value="traslado" ${x[2]==="traslado"?"selected":""}>
+                🚗 Traslado
+              </option>
+
+              <option value="descanso" ${x[2]==="descanso"?"selected":""}>
+                🌿 Descanso
+              </option>
+
+              <option value="recreacion" ${x[2]==="recreacion"?"selected":""}>
+                🎨 Recreación
+              </option>
+
+              <option value="educacion" ${x[2]==="educacion"?"selected":""}>
+                📚 Educación
+              </option>
+
+              <option value="social" ${x[2]==="social"?"selected":""}>
+                👥 Social
+              </option>
+
+              <option value="autocuidado" ${x[2]==="autocuidado"?"selected":""}>
+                🧖🏻‍♀️ Autocuidado
+              </option>
+
+            </select>
+
+            <select
+              id="i${i}"
+              style="margin-top:6px">
+
+              ${iconOptions.map(([icon,name])=>`
+                <option
+                  value="${icon}"
+                  ${currentIcon===icon?"selected":""}>
+                  ${icon||"○"} ${name}
+                </option>
+              `).join("")}
+
+            </select>
+
           </div>
+        `;
+      }).join("")}
 
-          <input
-            id="t${i}"
-            value="${esc(x[0])}"
-            placeholder="Hora"
-          >
-
-          <input
-            id="d${i}"
-            value="${esc(x[1])}"
-            placeholder="Descripción"
-            style="margin-top:5px"
-          >
-
-          <select
-            id="c${i}"
-            style="margin-top:5px">
-
-            <option value="admin" ${x[2]==="admin"?"selected":""}>
-              📋 Administrativo
-            </option>
-
-            <option value="comida" ${x[2]==="comida"?"selected":""}>
-              🍎 Comida
-            </option>
-
-            <option value="gym" ${x[2]==="gym"?"selected":""}>
-              🏋️ Gym
-            </option>
-
-            <option value="med" ${x[2]==="med"?"selected":""}>
-              💊 Medicamentos
-            </option>
-
-            <option value="trabajo" ${x[2]==="trabajo"?"selected":""}>
-              💼 Trabajo
-            </option>
-
-            <option value="traslado" ${x[2]==="traslado"?"selected":""}>
-              🚗 Traslado
-            </option>
-
-            <option value="descanso" ${x[2]==="descanso"?"selected":""}>
-              🌿 Descanso
-            </option>
-<option value="recreacion" ${x[2]==="recreacion"?"selected":""}>
-  🎨 Recreación
-</option>
-
-<option value="educacion" ${x[2]==="educacion"?"selected":""}>
-  📚 Educación
-</option>
-
-<option value="social" ${x[2]==="social"?"selected":""}>
-  👥 Social
-</option>
-
-<option value="autocuidado" ${x[2]==="autocuidado"?"selected":""}>
-  🧖🏻‍♀️ Autocuidado
-</option>
-          </select>
-
-        </div>
-      `).join("")}
     </div>
 
     <button
@@ -681,13 +773,19 @@ function renderEditDay(){
     </button>
 
     <div class="actions">
-      <button class="secondary" onclick="cancelEditDay()">
+
+      <button
+        class="secondary"
+        onclick="cancelEditDay()">
         Cancelar
       </button>
 
-      <button class="primary" onclick="saveDay()">
+      <button
+        class="primary"
+        onclick="saveDay()">
         Guardar cambios
       </button>
+
     </div>
   `;
 
@@ -698,13 +796,16 @@ function captureEditDayDraft(){
   if(!editDayDraft)return;
 
   editDayDraft.forEach((x,i)=>{
+
     const t=document.getElementById("t"+i);
     const d=document.getElementById("d"+i);
     const c=document.getElementById("c"+i);
+    const icon=document.getElementById("i"+i);
 
     if(t)x[0]=t.value;
     if(d)x[1]=d.value;
     if(c)x[2]=c.value;
+    if(icon)x[3]=icon.value;
   });
 }
 
