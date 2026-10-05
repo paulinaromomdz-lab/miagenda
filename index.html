@@ -400,14 +400,6 @@ function getTaskAssignment(key){
   };
 }
 
-
-function getTaskAssignment(key){
-  initTaskOrganization();
-  return state.taskCategoryAssignments[key]||{
-    categoryId:"",
-    subcategoryId:""
-  };
-}
 function tasksView(){
   initTaskOrganization();
 
